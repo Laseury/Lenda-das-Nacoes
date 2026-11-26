@@ -22,6 +22,7 @@ const AR_AJUSTES = {
   reservaMax: 3,        // o que sobra vai para a Reserva (só para Táticas)
 
   /* Mercado, Fusão e Peste */
+  fusao: false,         // Fusão de duas unidades: desligada (true volta a permitir)
   mercadoCartas: 3,     // cartas à venda por rodada
   mercadoPreco: 1,      // custo a mais de cada carta do Mercado
   mercadoMaoMax: 2,     // só compra no Mercado quem tem esta quantidade de cartas na mão, ou menos
@@ -37,6 +38,4 @@ const AR_AJUSTES = {
   /* Nações */
   gingaMin: 2,          // Brasil: a Ginga dá +1 de Ataque quando atacam pelo menos esta quantidade de unidades
   tentaculoMax: 12,     // Nórdicos: o quanto o Tentáculo pode crescer
-  geloMax: 5,           // Rússia: Gelo máximo numa unidade
-  congela: 3,           // Rússia: com este Gelo a unidade fica Congelada
 };

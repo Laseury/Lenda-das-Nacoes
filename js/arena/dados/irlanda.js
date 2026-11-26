@@ -18,10 +18,24 @@ AR_DECKS.ie = {
   /* Regras especiais desta nação: aparecem no Como Jogar, na aba da nação. Pode usar <b>negrito</b>. */
   regras: [
     '🐺 <b>Campeão:</b> um só monstro, Cú Chulainn. Começa em campo com 0/1 e cresce com as cartas, sem limite de Ataque. As unidades do Mercado não servem para a Irlanda.',
-    '⚔ <b>Investida:</b> ele ataca sozinho mesmo sem o Estandarte (3 de Influência; depois 6, 9…). Se cair, volta com os bônus permanentes e -1 de Ataque. Com 2 de Gelo fica Entorpecido e não Investe.',
-    '🔱 <b>Gáe Bulg:</b> começa na mão, dá +2/+1 e volta para a mão se ele cair. Da rodada 10 em diante, começar a rodada com 13 de mana (10 de Influência + 3 de Reserva) a faz ascender: +4/+4 e golpes que ferem o rival.',
+    '⚔ <b>Investida:</b> ele ataca sozinho mesmo sem o Estandarte (5 de Influência; depois 8, 11…). Se cair, volta com os bônus permanentes e -1 de Ataque.',
+    '🔱 <b>Gáe Bulg:</b> começa na mão, dá +1/+1 e volta para a mão se ele cair. Da rodada 10 em diante, começar a rodada com 13 de mana (10 de Influência + 3 de Reserva) a faz ascender: +4/+4 e golpes que ferem o rival.',
     '🖼 <b>Retratos:</b> a arte do Campeão muda com 3, 5 e 10 de Ataque.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Um só monstro: Cú Chulainn. Ele começa em campo e cresce com as suas Táticas, sem limite de Ataque, e pode Investir sozinho mesmo sem o Estandarte.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'Carro de Láeg, Treino em Dún Scáith e a Fogueira de Emain Macha fazem o Campeão crescer. Equipe a Gáe Bulg (começa na mão) assim que puder.'],
+      ['Meio', 'Invista quando ele estiver maior que os bloqueadores do rival (5 de Influência; a segunda custa 8). Pele de Chifre e a Asa da Morrígan o protegem.'],
+      ['Final', 'Da rodada 10 em diante, começar com 13 de mana faz a Gáe Bulg ascender (+4/+4). O Segredo de Scáthach dá Golpe Rápido para sempre.'],
+    ],
+    chave: ['a_ie_gaebulg', 'a_ie_treino', 'a_ie_fogueira', 'a_ie_couro', 'a_ie_scathach'],
+    cuidado: [
+      'Se ele cair, volta com -1 de Ataque: não Invista contra bloqueadores maiores.',
+      'Contra a Rússia, cada Gelo tira 1 de Vida dele; se cair pelo frio, vira um Estilhaço de Gelo na sua mão.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_ie_cu'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -46,7 +60,7 @@ AR_DECKS.ie = {
     ['a_ie_nevoa', 2],             // Névoa dos Sídhe (custo 2)
     /* Contínuas */
     ['a_ie_dubhan', 1],            // Dubhan, o Escudo Negro (custo 2)
-    ['a_ie_fogueira', 1],          // Fogueira de Emain Macha (custo 2)
+    ['a_ie_fogueira', 1],          // Fogueira de Emain Macha (custo 3)
     ['a_ie_vau', 2],               // O Vau (custo 4)
   ],
 };
@@ -91,7 +105,7 @@ AR_SAGAS.ulster = {
 
 /* ═════════════════════ Unidades ═════════════════════ */
 arUnidade({ id: 'a_ie_cu', nome: 'Cú Chulainn', nacao: 'IE', custo: 0, atk: 0, vida: 1, kw: ['lenda'], icone: '🐺', arte: 'a_ie_cu', arteHeroi: 'a_ie_cu_heroi', artes: [[10, 'a_ie_cu10'], [5, 'a_ie_cu5'], [3, 'a_ie_cu3']], campeao: true,
-  texto: 'Campeão: o único monstro do deck. Começa em campo e cresce com as cartas, sem limite de Ataque. Investe mesmo sem o Estandarte (3 de Influência; depois 6, 9… na mesma rodada). Se cair, pode ser chamado de volta com os bônus permanentes, mas com -1 de Ataque.' });
+  texto: 'Campeão: o único monstro do deck. Começa em campo e cresce com as cartas, sem limite de Ataque. Investe mesmo sem o Estandarte (5 de Influência; depois 8, 11… na mesma rodada). Se cair, pode ser chamado de volta com os bônus permanentes, mas com -1 de Ataque.' });
 
 /* ═════════════════════ Táticas ═════════════════════ */
 arTatica({ id: 'a_ie_carro', nome: 'Carro de Láeg', nacao: 'IE', custo: 1, velocidade: 'lenta', icone: '🐎', arte: 'a_ie_carro',
@@ -133,15 +147,15 @@ arSegredo({ id: 'a_ie_nevoa', nome: 'Névoa dos Sídhe', nacao: 'IE', custo: 2, 
 /* ═════════════════════ Contínuas ═════════════════════ */
 arContinua({ id: 'a_ie_dubhan', nome: 'Dubhan, o Escudo Negro', nacao: 'IE', custo: 2, icone: '🛡️', arte: 'a_ie_dubhan',
   texto: 'Contínua. Cada golpe na sua Capital causa 1 a menos.', escudoCapital: () => 1 });
-arContinua({ id: 'a_ie_fogueira', nome: 'Fogueira de Emain Macha', nacao: 'IE', custo: 2, icone: '🔥', arte: 'a_ie_fogueira',
+arContinua({ id: 'a_ie_fogueira', nome: 'Fogueira de Emain Macha', nacao: 'IE', custo: 3, icone: '🔥', arte: 'a_ie_fogueira',
   texto: 'Contínua. No início de cada rodada, o Campeão ganha +1/+1.', ouvir(k, p, tipo) { if (tipo === 'rodada') { const c = cao(p); if (c) AR.buff(c, 1, 1, false); } } });
 arContinua({ id: 'a_ie_vau', nome: 'O Vau', nacao: 'IE', custo: 4, icone: '🌊', arte: 'a_ie_vau',
   texto: 'Contínua. Enquanto o Campeão estiver em campo, o rival só pode atacar com 1 unidade por vez.', limiteRival: p => cao(p) ? 1 : 99 });
 
 /* ═════════════════════ Equipamentos ═════════════════════ */
-arEquip({ id: 'a_ie_gaebulg', nome: 'Gáe Bulg', nacao: 'IE', custo: 2, icone: '🔱', arte: 'a_ie_gaebulg', arteAsc: 'a_ie_gaebulg_asc', lendaria: true, atk: 2, vida: 1,
+arEquip({ id: 'a_ie_gaebulg', nome: 'Gáe Bulg', nacao: 'IE', custo: 2, icone: '🔱', arte: 'a_ie_gaebulg', arteAsc: 'a_ie_gaebulg_asc', lendaria: true, atk: 1, vida: 1,
   asc: { nome: 'Gáe Bulg Ascendida', atk: 4, vida: 4 },
-  texto: 'Lança lendária de Cú Chulainn: +2/+1. Se ele cair, volta para a sua mão. Da rodada 10 em diante, começar a rodada com 13 de mana (10 de Influência + 3 de Reserva) a faz ASCENDER para sempre.',
+  texto: 'Lança lendária de Cú Chulainn: +1/+1. Se ele cair, volta para a sua mão. Da rodada 10 em diante, começar a rodada com 13 de mana (10 de Influência + 3 de Reserva) a faz ASCENDER para sempre.',
   textoAsc: 'Ascendida: +4/+4. Quando Cú Chulainn destrói um monstro, o rival sofre metade do Ataque dele. Quando ataca, o rival compra 1 e mostra: se for monstro, todos os monstros dele são destruídos; se for outra carta, cure metade da sua Capital atual. Se ele cair, volta para a mão.' });
 
 /* ═════════════════════ Fichas, Clímax e a carta do Líder (não entram na lista do deck) ═════════════════════ */
@@ -151,7 +165,7 @@ arTatica({ id: 'a_ie_lugh', nome: 'Lugh, o Pai Divino', nacao: 'IE', custo: 4, v
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── O Campeão: Cú Chulainn é o próprio Herói. Sobe de nível com 5 e com 10 de Ataque. ── */

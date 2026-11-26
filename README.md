@@ -176,8 +176,8 @@ Código em `js/arena/`: `motor.js` (`AR`, motor síncrono por ações), `ia.js` 
 - Saga da Nação: 5 Marcos, cada um com uma Lei; no 3º o Líder ascende, no 5º vem o Clímax.
 - Mão inicial: dá para devolver tudo e comprar 1 a menos, até ficar com 3. Oferenda: 1 vez por rodada, 1 carta da mão vira Influência (até o teto).
 - Heróis: até 2 por deck (`arHeroi({ niveis, assinatura, missao, facil })`, 3 níveis, XP em campo, Assinatura no nível 3; ficam no deck e chegam pela compra normal, com o Chamado desligado em `ajustes.js`).
-- Mercado Mundial, Fusão, Eventos Mundiais, Pilha, Segredos e Contínuas.
-- Dez decks: Brasil (Ginga), Japão (Evolução), Espanha (Palos), Grécia (Trabalhos), Nórdicos (Agitar), Portugal (Descobrir), Pangeia (Clima), Irlanda (Campeão), China (Ano do Animal) e Rússia (Gelo).
+- Mercado Mundial, Eventos Mundiais, Pilha, Segredos e Contínuas. A Fusão foi retirada (`fusao: false` em `ajustes.js`).
+- Onze decks: Brasil (Ginga), Japão (Evolução), Espanha (Palos), Grécia (Trabalhos), Nórdicos (Agitar), Portugal (Descobrir), Pangeia (Clima), Irlanda (Campeão), China (Ano do Animal), Rússia (Gelo) e Velho Oeste (Recompensa).
 
 ### Online da Arena
 

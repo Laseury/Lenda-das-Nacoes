@@ -33,10 +33,11 @@ const AR_KW = {
   vigia: { nome: 'Vigia', icone: '👁️', texto: 'Pode bloquear unidades Elusivas.' },
   imprudente: { nome: 'Imprudente', icone: '💢', texto: 'Não pode bloquear.' },
   honra: { nome: 'Honra', icone: '🎌', texto: 'Japão: ao evoluir, compre 1 carta.' },
-  ginga: { nome: 'Ginga', icone: '🪘', texto: 'Brasil: ao atacar junto com pelo menos 1 aliado, ganha +1 de Ataque.' },
+  ginga: { nome: 'Ginga', icone: '🪘', texto: 'Brasil: ao atacar junto com pelo menos 1 aliado, ganha +1 de Ataque e +1 de Vida nesta rodada.' },
   regenera: { nome: 'Regeneração', icone: '🌿', texto: 'No fim de cada rodada, cura todo o dano.' },
   furia: { nome: 'Fúria', icone: '😤', texto: 'Quando derruba um inimigo em combate e sobrevive, ganha +1/+1.' },
   lenda: { nome: 'Lenda', icone: '⭐', texto: 'Uma figura lendária: no máximo 6 Lendas por deck.' },
+  procurado: { nome: 'Procurado', icone: '💰', texto: 'Tem a cabeça a prêmio: quando cair, o Velho Oeste cobra a Recompensa (+1 de Influência na hora e 1 carta).' },
 };
 
 /* ═════════════════════ Registros ═════════════════════ */
@@ -56,8 +57,6 @@ const arContinua = d => { AR_CARTAS[d.id] = { tipo: 'continua', ...d }; };
 const arEquip = d => { AR_CARTAS[d.id] = { tipo: 'equipamento', ...d }; };
 /* Assinatura de um Herói: uma Tática única que vai para a mão no nível 3. */
 const assinar = d => arTatica({ nacao: d.nacao, ...d });
-/* Fusão especial: o par (a, b) nasce com nome próprio e bônus. Qualquer outro par também se funde, sem bônus. */
-const arFusao = (a, b, d) => { AR_FUSOES[[a, b].sort().join('+')] = d; };
 
 /* ═════════════════════ Atalhos de efeito ═════════════════════ */
 /* Recebem a carta/unidade que age e o alvo. Ex.: grito: AR_F.buff(1, 1, false) = outro aliado ganha +1/+1 permanente. */
@@ -87,9 +86,10 @@ const arMissao = {
   bando: (n, vira) => ({ n, acao: 'Atacar com 3 ou mais aliados', vira, conta: (u, tipo, d) => tipo === 'ataque' && d.p.i === u.dono && d.atacantes.length >= 3 }),
   descobrir: (n, vira) => ({ n, acao: 'Descobrir uma carta', vira, conta: (u, tipo, d) => tipo === 'descobrir' && d.p.i === u.dono }),
   eras: (n, vira) => ({ n, acao: 'Viver uma Era', vira, conta: (u, tipo, d) => tipo === 'era' && d.p.i === u.dono }),
-  congelar: (n, vira) => ({ n, acao: 'Congelar um inimigo', vira, conta: (u, tipo, d) => tipo === 'gelo' && d.congelou && d.p.i === u.dono }),
+  congelar: (n, vira) => ({ n, acao: 'Pôr Gelo num inimigo', vira, conta: (u, tipo, d) => tipo === 'gelo' && d.p.i === u.dono }),
   ataque: (n, vira) => ({ n, acao: 'Atacar com ele', vira, conta: (u, tipo, d) => tipo === 'ataque' && d.atacantes.includes(u) }),
   ano: (n, vira) => ({ n, acao: 'O ano mudar', vira, conta: (u, tipo) => tipo === 'ano' }),
+  recompensa: (n, vira) => ({ n, acao: 'Cobrar uma Recompensa', vira, conta: (u, tipo, d) => tipo === 'recompensa' && d.p.i === u.dono }),
 };
 
 /* arHeroi({ niveis: [nível 1, nível 2, nível 3], assinatura, missao, facil })

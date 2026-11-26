@@ -4,7 +4,7 @@
  * ficam em js/arena/motor.js; as dicas da CPU, em js/arena/ia.js. */
 /* ───────────────────────── ESPANHA: Os 5 Palos ─────────────────────────
  * Toque os 5 Palos do flamenco (cada um é uma Tática). Cada Palo deixa uma Lei no tablao. Com os 5, El Duende desperta:
- * se ele ainda estiver em campo quando a próxima rodada começar, você vence. */
+ * se ele declarar um ataque, você vence. */
 
 /* ═════════════════════ Ferramentas deste deck (usadas pelas cartas abaixo) ═════════════════════ */
 const palosTocados = p => p.saga ? p.saga.feitos.size : 0;
@@ -14,13 +14,27 @@ AR_DECKS.es = {
   id: 'es', nome: 'Tablao Flamenco', nacao: 'ES', lider: 'es', saga: 'palos',
   /* nome e cor no mapa-múndi (o desenho do país fica em js/arena/mapa.js) */
   pais: { nome: 'Espanha', cor: '#ffc14d' },
-  resumo: 'Toque os 5 Palos (Táticas) para acender o tablao: cada Palo deixa uma Lei. Com os 5, El Duende desperta e, se sobreviver uma rodada, você vence. Segredos protegem o compás.',
+  resumo: 'Toque os 5 Palos (Táticas) para acender o tablao: cada Palo deixa uma Lei. Com os 5, El Duende desperta: se ele declarar um ataque, você vence. Segredos protegem o compás.',
   /* Regras especiais desta nação: aparecem no Como Jogar, na aba da nação. Pode usar <b>negrito</b>. */
   regras: [
     '🎸 <b>Palos:</b> 5 Táticas (Soleá, Bulería, Alegrías, Seguiriya e Fandango). Cada Palo tocado fecha um Capítulo da Saga e deixa uma Lei.',
-    '✨ <b>El Duende:</b> com os 5 Palos, El Duende entra em campo. Se ele ainda estiver lá quando a próxima rodada começar, a Espanha vence.',
+    '✨ <b>El Duende:</b> com os 5 Palos, El Duende entra em campo. Se ele <b>declarar um ataque</b> (com o Estandarte 🚩), a Espanha vence na hora. Antes disso, o rival pode derrubá-lo ou Atordoá-lo.',
     '🔒 <b>Segredos:</b> ficam virados na zona de Relíquias e disparam sozinhos quando o rival ataca ou usa Táticas.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Toque os 5 Palos (Táticas) para acender o tablao. Cada Palo deixa uma Lei; com os 5, El Duende entra e, se declarar um ataque, você vence.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'Palmero e Sancho seguram o campo. Arme um Segredo (¡Olé!, Contratempo) para o rival pensar duas vezes antes de atacar.'],
+      ['Meio', 'Toque um Palo por rodada. O Guitarrista busca o Palo que falta. Soleá compra carta; Bulería dá Ataque nos seus ataques.'],
+      ['Final', 'Com 4 Palos, limpe o campo do rival (Seguiriya, Taconeo, Zapateado) antes do último: El Duende tem só 1 de Vida e precisa estar vivo e livre na sua rodada de Estandarte 🚩 para atacar.'],
+    ],
+    chave: ['a_es_guitarrista', 'a_es_solea', 'a_es_seguiriya', 'a_es_fandango', 'a_es_ole'],
+    cuidado: [
+      'Não toque o último Palo com o rival cheio de dano pronto: El Duende cai fácil.',
+      'O mesmo Palo duas vezes não avança a Saga.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_es_quixote', 'a_es_cid'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -66,13 +80,13 @@ AR_SAGAS.palos = {
   resumo: 'Toque os 5 Palos do flamenco. Cada um deixa uma Lei no tablao.',
   marcos: [
     { id: 'solea', nome: 'Soleá', icone: '🌙', texto: 'Toque a Soleá.', lei: 'solea', leiTexto: 'Sua primeira Tática de cada rodada custa 1 a menos.' },
-    { id: 'buleria', nome: 'Bulería', icone: '🔥', texto: 'Toque a Bulería.', lei: 'buleria', leiTexto: 'Seus aliados têm +1 de Ataque.' },
+    { id: 'buleria', nome: 'Bulería', icone: '🔥', texto: 'Toque a Bulería.', lei: 'buleria', leiTexto: 'Seus aliados têm +1 de Ataque quando atacam.' },
     { id: 'alegrias', nome: 'Alegrías', icone: '☀️', texto: 'Toque as Alegrías.', lei: 'alegrias', leiTexto: 'Cure 1 da sua Capital no início de cada rodada.' },
     { id: 'seguiriya', nome: 'Seguiriya', icone: '🗡️', texto: 'Toque a Seguiriya.', lei: 'seguiriya', leiTexto: 'O Zapateado do Líder causa +1 de dano.' },
     { id: 'fandango', nome: 'Fandango', icone: '🎶', texto: 'Toque o Fandango.', lei: 'fandango', leiTexto: 'No fim de cada rodada, cause 1 de dano à Capital rival.' },
   ],
   climaxNome: 'El Duende desperta',
-  climaxTexto: 'El Duende (4/1) entra em campo. Se ele ainda estiver lá quando a próxima rodada começar, você vence.',
+  climaxTexto: 'El Duende (4/1) entra em campo. Se ele declarar um ataque, você vence.',
   ouvir(p, tipo, d) { if (tipo === 'tatica' && d.p === p && d.c.d.palo) AR.marco(p, d.c.d.palo); },
   climax(p) {
     if (p.campo.length >= AR.CAMPO_MAX) AR.voltarMao(p.campo.slice().sort((a, b) => AR.atk(a) - AR.atk(b))[0]);
@@ -125,14 +139,14 @@ arSegredo({ id: 'a_es_capote', nome: 'Capote', nacao: 'ES', custo: 3, icone: '�
 
 /* ═════════════════════ Fichas, Clímax e a carta do Líder (não entram na lista do deck) ═════════════════════ */
 arUnidade({ id: 'a_es_duende', nome: 'El Duende', nacao: 'ES', custo: 0, atk: 4, vida: 1, kw: ['lenda'], icone: '✨', arte: 'a_es_duende', climax: true,
-  venceSeSobreviver: 'El Duende dançou até o amanhecer: o tablao inteiro se levanta! A Espanha vence.',
-  texto: 'Clímax: se ainda estiver em campo quando a próxima rodada começar, você vence.' });
+  venceAoAtacar: 'El Duende dança no ataque: o tablao inteiro se levanta! A Espanha vence.',
+  texto: 'Clímax: se ele declarar um ataque, você vence.' });
 arUnidade({ id: 'a_es_bailaora', nome: 'La Bailaora', nacao: 'ES', custo: 5, atk: 4, vida: 4, kw: ['lenda', 'rapido'], icone: '💃', arte: 'a_es_bailaora', doLider: true,
   texto: 'Grito de Guerra: cause 2 de dano a um inimigo.', alvo: { quem: 'inimigo', opcional: true }, grito: AR_F.danoAlvo(2) });
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Dom Quixote ── */
@@ -154,6 +168,3 @@ arUnidade({ id: 'a_es_cid3', nome: 'El Cid, Vencedor Depois da Morte', nacao: 'E
 assinar({ id: 'a_es_tizona', nome: 'Tizona', nacao: 'ES', custo: 2, velocidade: 'rapida', icone: '🗡️', arte: 'a_es_tizona', texto: 'Um aliado ganha +3/+3 e Esmagar nesta rodada.', alvo: { quem: 'aliado' }, efeito: (u, alvo) => { AR.buff(alvo, 3, 3, true); AR.darKw(alvo, 'esmagar', true); } });
 arHeroi({ niveis: ['a_es_cid', 'a_es_cid2', 'a_es_cid3'], assinatura: 'a_es_tizona', missao: 'ataque' });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_es_quixote', 'a_es_sancho', { nome: 'Cavaleiro e Escudeiro', icone: '🐴', arte: 'a_es_quixote', kw: ['barreira'], texto: 'A dupla da Mancha: Barreira a cada rodada.' });
-arFusao('a_es_cid', 'a_es_toureiro', { nome: 'Campeador de Arena', icone: '🏟️', arte: 'a_es_cid2', kw: ['robusto'], texto: 'Fusão especial: Robusto.' });

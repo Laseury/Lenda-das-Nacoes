@@ -28,6 +28,7 @@ const AR_MESA = (() => {
     PG: `<rect width="30" height="21" ${f('--pg-3')}/><path d="M15 2.2c4.6-.4 8.3 2 8 5.2-.2 1.8-2 2-1.6 3.6.6 2.6-1 3.6-2.8 4-1.6.4-1.2 3-3 3.8-2.4 1-3.6-1.6-3.4-3.6.2-1.6-2-2-3.4-2.8-2-1.2-2-4.4-.6-6.6C9.4 3.800 12 2.500 15 2.200Z" ${f('--pg-1')}/><circle cx="14" cy="9" r="2.4" ${f('--pg-2')}/>`,
     ES: `<rect width="30" height="21" ${f('--es-1')}/><rect y="5.25" width="30" height="10.5" ${f('--es-2')}/>`,
     CN: `<rect width="30" height="21" ${f('--cn-1')}/><path d="M6 2.4l1 2.9h3l-2.4 1.8.9 2.9L6 8.200 3.500 10l.9-2.900L2 5.300h3Z" ${f('--cn-2')}/><circle cx="12" cy="2.600" r=".8" ${f('--cn-2')}/><circle cx="14" cy="5" r=".8" ${f('--cn-2')}/><circle cx="14" cy="8" r=".8" ${f('--cn-2')}/><circle cx="12" cy="10.500" r=".8" ${f('--cn-2')}/>`,
+    OE: `<rect width="30" height="21" ${f('--oe-1')}/><rect y="15" width="30" height="6" ${f('--oe-3')}/><path d="M15 3.2l1.5 3.9 4.2.2-3.3 2.6 1.1 4-3.5-2.3-3.5 2.3 1.1-4-3.3-2.6 4.2-.2z" ${f('--oe-2')}/>`,
     RU: `<rect width="30" height="7" ${f('--ru-1')}/><rect y="7" width="30" height="7" ${f('--ru-2')}/><rect y="14" width="30" height="7" ${f('--ru-3')}/>`,
     IE: `<rect width="10" height="21" ${f('--ie-1')}/><rect x="10" width="10" height="21" ${f('--ie-2')}/><rect x="20" width="10" height="21" ${f('--ie-3')}/>`,
     GR: `<rect width="30" height="21" ${f('--gr-1')}/><rect y="2.33" width="30" height="2.33" ${f('--gr-2')}/><rect y="7" width="30" height="2.33" ${f('--gr-2')}/><rect y="11.67" width="30" height="2.33" ${f('--gr-2')}/><rect y="16.33" width="30" height="2.33" ${f('--gr-2')}/><rect width="11.67" height="11.67" ${f('--gr-1')}/><rect x="4.67" width="2.33" height="11.67" ${f('--gr-2')}/><rect y="4.67" width="11.67" height="2.33" ${f('--gr-2')}/>`,
@@ -113,7 +114,7 @@ const AR_MESA = (() => {
       ${kws.length ? `<div class="ar-kws">${kws.map(k => `<span title="${AR_KW[k].nome}">${AR_KW[k].icone}${mostraTexto ? `<em>${AR_KW[k].nome}</em>` : ''}</span>`).join('')}</div>` : ''}
       ${mostraTexto && texto ? `<div class="ar-texto">${texto}</div>` : ''}
       ${pe}
-      ${u && u.equip ? `<span class="ar-equip ${AR.gaeAtiva(u) ? 'asc' : ''}" title="${esc(AR.gaeAtiva(u) ? u.equip.d.asc.nome : u.equip.d.nome)}">🔱</span>` : ''}${ev}${u && u.atordoado ? '<span class="ar-selo" title="Atordoado">💫</span>' : ''}${u && u.gelo ? `<span class="ar-gelo" title="${u.gelo} de Gelo: -${u.gelo} de Ataque${AR.congelada(u) ? '. Congelada: não ataca nem bloqueia' : ''}">❄️${u.gelo}</span>` : ''}${d.heroi ? `<span class="ar-estrelas" title="Herói: nível ${nivelHeroi(d, u)} de 3">${'★'.repeat(nivelHeroi(d, u))}<i>${'★'.repeat(3 - nivelHeroi(d, u))}</i></span>` : ''}${u && d.bencao && AR.doAno(u) ? `<span class="ar-bencao ${u.bencaoAno === G().anoN ? 'usada' : ''} ${u.dono === EU && podeAgir() && !E.modo && AR.podeBencao(eu(), u) ? 'pode' : ''}" data-bencao="${u.uid}" title="Bênção: ${esc(d.bencao.nome)}. ${esc(d.bencao.texto)}${u.bencaoAno === G().anoN ? ' (já usada neste ano)' : ''}">☯</span>` : ''}${d.signo && AR.estado() && c.dono != null && AR.estado().jog[c.dono] ? `<span class="ar-signo ${AR.ano() === d.signo ? 'agora' : AR.estado().jog[c.dono].zodiaco.has(d.signo) ? 'ja' : ''}" title="${AR.ano() === d.signo ? 'É o ano deste Animal' : AR.estado().jog[c.dono].zodiaco.has(d.signo) ? 'Este ano já foi celebrado' : 'Este ano ainda não foi celebrado'}">${AR_SIGNOS[d.signo].icone}</span>` : ''}${selo}${u && d.feito ? `<span class="ar-feito" title="Feito: ${esc(d.feito.texto)}">⭐${u.feitoN || 0}/${d.feito.n}</span>` : ''}
+      ${u && u.equip ? `<span class="ar-equip ${AR.gaeAtiva(u) ? 'asc' : ''}" title="${esc(AR.gaeAtiva(u) ? u.equip.d.asc.nome : u.equip.d.nome)}">🔱</span>` : ''}${ev}${u && u.atordoado ? '<span class="ar-selo" title="Atordoado">💫</span>' : ''}${u && u.gelo ? `<span class="ar-gelo" title="${u.gelo} de Gelo: -${u.gelo} de Vida. Se a Vida zerar, cai pelo frio e vira um Estilhaço de Gelo na mão do dono.">❄️${u.gelo}</span>` : ''}${d.heroi ? `<span class="ar-estrelas" title="Herói: nível ${nivelHeroi(d, u)} de 3">${'★'.repeat(nivelHeroi(d, u))}<i>${'★'.repeat(3 - nivelHeroi(d, u))}</i></span>` : ''}${u && d.bencao && AR.doAno(u) ? `<span class="ar-bencao ${u.bencaoAno === G().anoN ? 'usada' : ''} ${u.dono === EU && podeAgir() && !E.modo && AR.podeBencao(eu(), u) ? 'pode' : ''}" data-bencao="${u.uid}" title="Bênção: ${esc(d.bencao.nome)}. ${esc(d.bencao.texto)}${u.bencaoAno === G().anoN ? ' (já usada neste ano)' : ''}">☯</span>` : ''}${d.signo && AR.estado() && c.dono != null && AR.estado().jog[c.dono] ? `<span class="ar-signo ${AR.ano() === d.signo ? 'agora' : AR.estado().jog[c.dono].zodiaco.has(d.signo) ? 'ja' : ''}" title="${AR.ano() === d.signo ? 'É o ano deste Animal' : AR.estado().jog[c.dono].zodiaco.has(d.signo) ? 'Este ano já foi celebrado' : 'Este ano ainda não foi celebrado'}">${AR_SIGNOS[d.signo].icone}</span>` : ''}${selo}${u && d.feito ? `<span class="ar-feito" title="Feito: ${esc(d.feito.texto)}">⭐${u.feitoN || 0}/${d.feito.n}</span>` : ''}
     </div>`;
   }
   /* O nível do Herói: pela forma da carta; o Campeão da Irlanda, pelo registro do jogador. */
@@ -121,7 +122,8 @@ const AR_MESA = (() => {
   /* Mecânicas de nação que aparecem nos textos: a explicação vai junto no zoom. */
   const TERMOS = [
     [/Agit/, '🐙 Agitar', 'o Tentáculo do Kraken cresce +1/+1 (até 12), mesmo antes de entrar em campo, e a Saga dos Nórdicos avança.'],
-    [/Gelo|Congel/, '❄️ Gelo', 'cada um tira 1 de Ataque. Com 3 ou mais, a unidade fica Congelada: não ataca nem bloqueia. Derrete 1 por rodada. Cú Chulainn não congela: o Gelo além de 2 vira Queimadura de Frio (-1 de Ataque para sempre) e, com 2 de Gelo, ele fica Entorpecido e não Investe.'],
+    [/Gelo|Congel/, '❄️ Gelo', 'cada um tira 1 de Vida, sem limite. Derrete 1 por rodada. Quem cai pelo frio vira um Estilhaço de Gelo na mão do dono.'],
+    [/Estilhaço de Gelo/, '🧊 Estilhaço de Gelo', 'custo 0. Na mão, cada unidade que o dono invocar sofre dano igual ao valor; ao jogar, a Capital dele sofre esse valor.'],
     [/Descubr/, '🧭 Descobrir', 'veja 3 cartas da sua nação e escolha 1 para a mão.'],
     [/Atordo/, '💫 Atordoar', 'o inimigo sai do combate e não ataca nem bloqueia nesta rodada.'],
     [/Saudade/, '💧 Saudade', 'Portugal ganha 1 a cada aliado que cai; alimenta o Fado.'],
@@ -129,6 +131,7 @@ const AR_MESA = (() => {
     [/Precipit/, '🌩 Precipitar', 'veja 3 Eventos Mundiais e escolha qual entra agora.'],
     [/Fix[ae]/, '📌 Fixar', 'a próxima troca natural de Evento não acontece.'],
     [/Ano|signo/, '☯ Ano do Animal', 'cada rodada é o ano de um signo; os Animais do ano ficam mais fortes e liberam a Bênção.'],
+    [/Procurad|Recompensa/, '💰 Procurado', 'a marca fica no inimigo até ele cair; quando cai, o Velho Oeste cobra a Recompensa: +1 de Influência na hora, 1 carta e um passo na Saga.'],
     [/Invoque|Ficha/, '✨ Invocar', 'a unidade nasce direto no seu banco (se houver espaço).'],
   ];
   const termos = (txt, ja = '') => TERMOS.filter(([re, nome]) => re.test(txt || '') && !ja.includes(nome)).map(([, nome, t]) => `<li><b>${nome}:</b> ${t}</li>`).join('');
@@ -452,7 +455,7 @@ const AR_MESA = (() => {
         extra: [1, 2, 4].map(v => `<button class="btn pequeno ${E.vel === v ? 'primario' : ''}" data-ar="vel" data-vel="${v}">${v}x</button>`).join('') };
     }
     if (g.pilha.length && !podeAgir() && !g.pendente) return { txt: '⏳ A CPU está decidindo se responde ao seu efeito…', cls: 'cpu' };
-    if (g.pendente && emOnline()) return { txt: g.pendente.p === EU ? '' : g.pendente.tipo === 'troca' ? '🂠 O rival está escolhendo a mão inicial…' : '⏳ O rival está fazendo uma escolha…', cls: 'cpu' };
+    if (g.pendente && emOnline()) return { txt: g.pendente.tipo === 'troca' ? (AR.decideTroca(eu()) ? '' : '🂠 O rival ainda está escolhendo a mão inicial…') : g.pendente.p === EU ? '' : '⏳ O rival está fazendo uma escolha…', cls: 'cpu' };
     if (!podeAgir()) return { txt: g.fase === 'bloqueio' ? '🛡 A CPU está escolhendo os bloqueios…' : '⏳ A CPU está pensando…', cls: 'cpu' };
     if (g.pilha.length && !E.modo) {
       const it = g.pilha[g.pilha.length - 1];
@@ -556,6 +559,7 @@ const AR_MESA = (() => {
       + '<div class="ar-contadores">' + chipsHeroi(p) + (AR_DECKS[p.deckId].saga === 'kraken' ? `<span class="ar-contador agitar" title="Agitado: o Tentáculo tem +${AR.crescimento(p)}/+${AR.crescimento(p)}">🐙 ${p.agitado}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'carnaval' ? `<span class="ar-contador batucada" title="Batucada: aliados que já atacaram">🥁 ${p.samba || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'zodiaco' ? `<span class="ar-contador zodiaco" title="Anos celebrados: ${esc(Object.values(AR_SIGNOS).map(x => x.nome + (p.zodiaco.has(x.id) ? ' ✔' : '')).join(', '))}">🐉 ${p.zodiaco.size}/12</span>` : '')
+      + (AR_DECKS[p.deckId].saga === 'oeste' ? `<span class="ar-contador ouro" title="Recompensas cobradas: Procurados que caíram">💰 ${p.ouro || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'inverno' ? `<span class="ar-contador frio" title="Gelo que você já pôs nos inimigos">❄️ ${p.frio || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'eras' ? `<span class="ar-contador eras" title="Eras vividas: Guerra, Vida e Ruína (cada rodada que termina sob um Evento)">🔥${p.erasClima.guerra} 🌿${p.erasClima.vida} 🌑${p.erasClima.ruina}</span>` : '')
       + (AR_DECKS[p.deckId].campeao ? `<span class="ar-contador gae ${p.gaeAsc ? 'asc' : ''}" title="${p.gaeAsc ? 'Gáe Bulg ascendeu' : 'Da rodada 10 em diante, comece a rodada com 13 de mana (10 de Influência + 3 de Reserva, sem bônus de Evento) e a Gáe Bulg ascende'}">🔱 ${p.gaeAsc ? 'Ascendida' : `R${g.rodada}/10 · ${AR.manaGae(p)}/13`}</span>` : '')
@@ -629,7 +633,7 @@ const AR_MESA = (() => {
       if (E.ataque && E.ataque.ultimo && u.dono !== EU) cls.push('desafiavel');
       if (E.modo && E.modo.tipo === 'fusao') { if (E.modo.a === u) cls.push('escolhido'); else if (E.modo.a && AR.receitaFusao(E.modo.a, u)) cls.push('receita'); }
       return htmlCarta(u, { classes: cls.join(' ') });
-    }).join('') + '<span class="ar-vaga"></span>'.repeat(vagas);
+    }).join('') + '<span class="ar-vaga"></span>'.repeat(AR_DECKS[p.deckId].soCampeao ? 0 : vagas);
   }
   /* Zona de combate: uma coluna por duelo, CPU em cima e você embaixo. */
   function luta() {
@@ -767,6 +771,9 @@ const AR_MESA = (() => {
     const o = ok();
     $('#ar-ok').innerHTML = `<button class="ar-ok ${o.cls || ''}" ${o.k ? `data-ar="${o.k}"` : ''} ${o.dis ? 'disabled' : ''} ${o.k === 'confirmar-ataque' && !(E.ataque && E.ataque.sel.size) ? 'disabled' : ''}>${esc(rv(o.rot))}</button>`;
     $('#ar-tab').dataset.mundo = g.mundo ? g.mundo.id : '';
+    /* luz nas bordas: azul na sua vez (embaixo), vermelha na vez do rival (em cima); as duas na troca de mão */
+    const quem = g.vencedor !== null ? null : g.pendente ? (g.pendente.tipo === 'troca' && (g.pendente.quem || []).length > 1 ? 'ambos' : g.pendente.p) : g.vez;
+    $('#ar-tab').dataset.vez = quem == null ? '' : quem === 'ambos' ? 'ambos' : lugar(quem) === 0 && !E.assistindo ? 'eu' : 'cpu';
     $('#ar-rodada-info').innerHTML = `${g.mundo ? `<span class="ar-mundo-chip" data-mundo="1" title="${esc(g.mundo.texto)}">${g.mundo.clima ? AR_CLIMAS[g.mundo.clima].icone : ''} ${g.mundo.icone} ${esc(g.mundo.nome)} <small>até R${g.mundoAte - 1}${g.mundoFixo ? ' 📌' : ''}</small></span>` : ''}Rodada <b>${g.rodada}</b> · ${{ acao: 'Ações', bloqueio: 'Defesa', janela: 'Combate' }[g.fase] || ''} · ${E.assistindo ? `<b class="ar-vez ${g.vez === EU ? '' : 'cpu'}">Vez: ${g.jog[g.vez].nome}</b>` : g.vez === EU ? '<b class="ar-vez">Sua vez</b>' : `<b class="ar-vez cpu">${rv('Vez da CPU')}</b>`}`;
     $('#ar-mao-cpu').innerHTML = cpu().mao.map(c => E.assistindo || (E.replay && E.replay.ver) ? `<div class="ar-verso aberta n-${c.d.nacao}" ${bg(c.d.arte)} title="${esc(c.d.nome)}"><b>${AR.custo(cpu(), c)}</b><span>${c.d.icone}</span></div>` : '<div class="ar-verso"></div>').join('');
     /* o Campeão ganhou um retrato novo */
@@ -812,7 +819,7 @@ const AR_MESA = (() => {
     if (!el) return;
     if (E.replay) { el.hidden = true; return; }
     const P = g && g.pendente;
-    if (P && P.tipo === 'troca' && P.p === EU) {
+    if (P && P.tipo === 'troca' && AR.decideTroca(eu())) {
       const p = eu(), n = AR.cartasDaTroca(p);
       el.innerHTML = `<div class="janela ar-desc-janela"><h2>🂠 Sua mão inicial</h2><p class="janela-sub">Fique com ela ou devolva tudo ao deck e compre <b>${n}</b>. Dá para trocar até ficar com 3 cartas.</p>
         <div class="ar-mao-ops">${p.mao.map(c => `<span class="ar-mao-op">${htmlCarta(c, { tam: 'mao' })}</span>`).join('')}</div>
@@ -915,9 +922,13 @@ const AR_MESA = (() => {
       case 'capital': if (d.n < 0) hSoma(-d.n, n => `🏰 ${capDe(d.p)} −${n}`, d.p.i === EU && !E.assistindo ? 'neg forte' : 'neg', 'cap' + d.p.i); else hSoma(d.n, n => `🏰 ${capDe(d.p)} +${n}`, 'pos', 'capc' + d.p.i); break;
       case 'buff': if (d.a || d.v) hRes(`${d.a >= 0 ? '+' : ''}${d.a}/${d.v >= 0 ? '+' : ''}${d.v} ${d.u.d.nome}`, 'pos'); break;
       case 'atordoar': hRes(`💫 ${d.u.d.nome}`, ''); break;
-      case 'gelo': hRes(d.queima ? `🥶 Queimadura de Frio: ${d.u.d.nome} −1 de Ataque` : `❄️ +${d.n} ${d.u.d.nome}${d.congelou ? ' (congelou)' : ''}`, 'gelo'); break;
+      case 'gelo': hRes(`❄️ +${d.n} ${d.u.d.nome} (−${d.n} de Vida)`, 'gelo'); break;
+      case 'estilhaco': hRes(`🧊 Estilhaço de Gelo na mão de ${quemE(d.p.i)} (${d.n})`, 'gelo'); break;
       case 'voltar': hRes(`↩ ${d.u.d.nome} voltou à mão`, ''); break;
       case 'barreira': hRes(`🛡 Barreira de ${d.u.d.nome} anulou`, 'bloq'); break;
+      case 'recompensa': hRes(`💰 Recompensa por ${d.u.d.nome} (+1 💎, +1 carta)`, 'pos'); break;
+      case 'ganhaBarreira': hRes(`🛡 ${d.u.d.nome} ganhou Barreira`, 'bloq'); break;
+      case 'protege': hRes(d.tudo ? `🛡 ${capDe(d.p)} protegida` : `🛡 ${capDe(d.p)}: ${d.evitado} de dano evitado`, 'bloq'); break;
       case 'sacrificio': hRes(`🔥 ${d.u.d.nome} sacrificado`, 'morte'); break;
       case 'capitulo': hNovo({ p: d.p.i, ic: '📜', verbo: `Saga · Capítulo ${['I', 'II', 'III', 'IV', 'V'][d.cap - 1]}`, nome: d.m.nome, icone: d.m.icone, arte: d.p.saga.d.arte, saga: true, txt: d.m.leiTexto }); break;
       case 'climax': hNovo({ p: d.p.i, ic: '🌟', verbo: 'Clímax', nome: d.p.saga.d.climaxNome, arte: d.p.saga.d.arte, icone: d.p.saga.d.icone, txt: d.p.saga.d.climaxTexto }); break;
@@ -1031,8 +1042,11 @@ const AR_MESA = (() => {
     if (tipo === 'dano') { E.fx.push({ uid: d.u.uid, txt: `−${d.n}`, cls: 'neg' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-golpeado' }); }
     else if (tipo === 'capital') { if (d.n <= -4) E.tremor = d.n <= -7 ? 'forte' : 'leve'; E.fx.push({ cap: d.p.i, txt: `${d.n > 0 ? '+' : '−'}${Math.abs(d.n)}`, cls: d.n > 0 ? 'pos' : 'neg grande' }); E.marcas.push({ cap: d.p.i, cls: d.n > 0 ? 'ar-cura' : 'ar-treme' }); }
     else if (tipo === 'buff') { E.fx.push({ uid: d.u.uid, txt: `${d.a >= 0 ? '+' : ''}${d.a}/${d.v >= 0 ? '+' : ''}${d.v}`, cls: 'pos' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-buffado' }); }
-    else if (tipo === 'barreira') E.marcas.push({ uid: d.u.uid, cls: 'ar-escudo' });
-    else if (tipo === 'gelo' && d.queima) { E.fx.push({ uid: d.u.uid, txt: '🥶 −1', cls: 'gelo' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-gelado' }); }
+    else if (tipo === 'barreira') { E.marcas.push({ uid: d.u.uid, cls: 'ar-escudo-quebra' }); E.fx.push({ uid: d.u.uid, txt: '🛡 Anulou!', cls: 'escudo' }); }
+    else if (tipo === 'ganhaBarreira') { E.marcas.push({ uid: d.u.uid, cls: 'ar-escudo-ganha' }); E.fx.push({ uid: d.u.uid, txt: '🛡 Barreira', cls: 'escudo' }); }
+    else if (tipo === 'recompensa') { E.fx.push({ cap: d.p.i, txt: '💰 +1', cls: 'pos grande' }); toast(`💰 Recompensa: ${d.u.d.nome} caiu (${d.n})`); }
+    else if (tipo === 'protege') { E.marcas.push({ cap: d.p.i, cls: 'ar-cap-protegida' }); E.fx.push({ cap: d.p.i, txt: d.tudo ? '🛡 Protegida!' : `🛡 −${d.evitado} evitado`, cls: 'escudo grande' }); }
+    else if (tipo === 'estilhaco') toast(d.p.i === EU && !E.assistindo ? `🧊 Você recebeu um Estilhaço de Gelo (${d.n})` : `🧊 ${nomeDe(d.p)} recebeu um Estilhaço de Gelo (${d.n})`);
     else if (tipo === 'gelo') { E.fx.push({ uid: d.u.uid, txt: `❄️+${d.n}`, cls: 'gelo' }); E.marcas.push({ uid: d.u.uid, cls: d.congelou ? 'ar-congela' : 'ar-gelado' }); }
     else if (tipo === 'zodiaco') toast(`${AR_SIGNOS[d.signo].icone} ${nomeDe(d.p) === 'A CPU' && d.p.i === EU ? 'Você celebra' : d.p.i === EU && !E.assistindo ? 'Você celebra' : nomeDe(d.p) + ' celebra'} o ano ${AR_SIGNOS[d.signo].artigo} ${AR_SIGNOS[d.signo].nome} (${d.n}/12)`);
     else if (tipo === 'ano') { const S = AR_SIGNOS[d.id]; E.banner = { txt: `${S.icone} Ano ${S.artigo} ${S.nome}`, sub: S.texto, cls: 'ano' }; for (const u of AR.todas()) if (AR.doAno(u)) E.marcas.push({ uid: u.uid, cls: 'ar-buffado' }); }
@@ -1635,6 +1649,28 @@ const AR_MESA = (() => {
       ${(D.herois || []).length ? `<h3>Heróis</h3><ul>${D.herois.map(heroi).join('')}</ul>` : ''}
     </div>`;
   }
+  /* ───────── Estratégia: introdução ao deck de quem joga ───────── */
+  function abrirEstrategia(id) {
+    const a = $('#ar-ajuda');
+    id = id || (G() ? G().jog[EU].deckId : E.minha);
+    const D = AR_DECKS[id], T = D.estrategia;
+    if (!T) { abrirAjuda('n-' + id); return; }
+    const L = AR_LIDERES[D.lider];
+    const carta = cid => { const d = AR_CARTAS[cid]; return d ? `<button class="ar-est-carta" data-id="${cid}" title="${esc(d.nome)}"><span class="ar-est-arte ${temFoto(d.arte) ? 'com-foto' : ''}" ${bg(d.arte)}>${temFoto(d.arte) ? '' : d.icone}</span><b>${esc(d.nome)}</b><small>💎${d.custo}${d.tipo === 'unidade' ? ` · ${d.atk}/${d.vida}` : ''}</small></button>` : ''; };
+    a.innerHTML = `<div class="janela ar-ajuda-janela ar-est-janela"><div class="ar-ajuda-topo"><h2>🧭 Estratégia</h2><button class="ar-icone-btn" data-ar="ajuda" title="Fechar">✕</button></div>
+      <div class="ar-ajuda-corpo">
+        <div class="ar-regra-cab com-foto" style="--cor:${D.pais ? D.pais.cor : '#c9a256'};background-image:url('${cena(id)}')">${bandeira(D.nacao)}<div><small>Seu deck · ${esc(D.pais ? D.pais.nome : id)}</small><strong>${esc(D.nome)}</strong></div></div>
+        <p class="ar-est-plano"><b>O plano:</b> ${esc(T.plano)}</p>
+        <div class="ar-est-passos">${T.passos.map(([t, x], k) => `<div class="ar-est-passo"><span>${k + 1}</span><b>${esc(t)}</b><p>${esc(x)}</p></div>`).join('')}</div>
+        <h3>Cartas-chave <small>(passe o mouse ou toque para ler)</small></h3>
+        <div class="ar-est-cartas">${T.chave.map(carta).join('')}</div>
+        <h3>Seu Líder: ${esc(L.nome)}</h3>
+        <ul><li><b>${esc(L.poder.nome)}</b> (💎${L.poder.custo}): ${esc(L.poder.texto)} Use 1 vez por rodada, na sua vez.</li><li><b>Ascensão:</b> ${esc(L.ascensao.texto)} Depois o Poder vira <b>${esc(L.poder2.nome)}</b>.</li></ul>
+        <h3>Cuidado</h3><ul>${T.cuidado.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      </div>
+      <div class="janela-botoes"><button class="btn" data-aba-ajuda="n-${id}">📜 Regras da nação</button><button class="btn primario" data-ar="ajuda">Entendi</button></div></div>`;
+    a.hidden = false;
+  }
   function abrirAjuda(aba) {
     const a = $('#ar-ajuda');
     if (!a.hidden && !aba) { a.hidden = true; return; }
@@ -1702,7 +1738,8 @@ const AR_MESA = (() => {
       if (b) {
         const k = b.dataset.ar;
         if (k === 'replay') { entrarReplay(); return; }
-        if (E.replay && !['diario', 'log-hist', 'log-texto', 'regras', 'ajuda'].includes(k)) { if (k === 'sair') sairReplay(); else if (k === 'rp-play') controleReplay('play'); return; }
+        if (k === 'estrategia') { const a = $('#ar-ajuda'); if (!a.hidden && a.querySelector('.ar-est-janela')) a.hidden = true; else abrirEstrategia(); return; }
+        if (E.replay && !['diario', 'log-hist', 'log-texto', 'regras', 'ajuda', 'estrategia'].includes(k)) { if (k === 'sair') sairReplay(); else if (k === 'rp-play') controleReplay('play'); return; }
         if (k === 'revanche' && emOnline()) { if (ON.papel === 'anfitriao' && ON.outro) comecarSala(); else toast(ON.outro ? 'O anfitrião começa a revanche.' : 'O rival saiu da sala.'); return; }
         if (k === 'sala-criar' || k === 'sala-entrar') { entrarSala(k === 'sala-criar'); return; }
         if (k === 'sala-sair') { sairSala(); return; }
@@ -1725,7 +1762,7 @@ const AR_MESA = (() => {
         return;
       }
       if (!G() || $('#ar-jogo').hidden) return;
-      const li = e.target.closest('#ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist]');
+      const li = e.target.closest('#ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist], #ar-ajuda [data-id]');
       if (li) { mostrarZoom(li, !temMouse()); return; }
       const el = e.target.closest('#ar-tab [data-uid]');
       if (!el) return;
@@ -1739,7 +1776,7 @@ const AR_MESA = (() => {
     });
     document.addEventListener('mouseover', e => {
       if (document.body.dataset.tela !== 'arena' || !temMouse()) return;
-      const el = e.target.closest('#ar-tab [data-uid], #ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist], #ar-decks [data-id], #ar-decks [data-heroi], #ar-decks [data-saga-id]');
+      const el = e.target.closest('#ar-tab [data-uid], #ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist], #ar-ajuda [data-id], #ar-decks [data-id], #ar-decks [data-heroi], #ar-decks [data-saga-id]');
       if (el) mostrarZoom(el); else esconderZoom();
     });
     /* o que a pessoa cola no Convite direto não some quando a tela redesenha */

@@ -17,6 +17,20 @@ AR_DECKS.gr = {
     '⚡ <b>Olimpo:</b> com os 5 Trabalhos, Héracles sobe ao Olimpo e a Grécia vence na hora.',
     '🛡 <b>Defesa conta:</b> o Cinto de Hipólita pede que um bloqueador seu derrube o atacante e sobreviva.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Lute muito: os 5 Trabalhos de Héracles se cumprem no combate (derrubar inimigos fortes, matar 2 de uma vez, acertar a Capital, trazer alguém do Hades, bloquear e vencer). Com os 5, a Grécia vence.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'Hoplita, Arqueiro e Mensageiro fazem a base. Bloqueie com unidades de Vida alta: bloquear e sobreviver também é um Trabalho.'],
+      ['Meio', 'Quíron e Ambrosia vencem combates. Aquiles (sobreviver) e Héracles (derrubar) são os Heróis: mantenha-os lutando.'],
+      ['Final', 'Descida ao Hades traz de volta quem caiu (Cérbero). A Fúria de Zeus limpa o campo. Conte os Trabalhos que faltam e procure exatamente esses combates.'],
+    ],
+    chave: ['a_gr_quiron', 'a_gr_ambrosia', 'a_gr_heracles', 'a_gr_hades', 'a_gr_zeus'],
+    cuidado: [
+      'Atacar sem chance de derrubar ninguém não avança a Saga.',
+      'Ambrosia é Rápida: guarde para a janela de Táticas e vire o combate.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_gr_aquiles', 'a_gr_heracles'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -128,7 +142,7 @@ arUnidade({ id: 'a_gr_atena', nome: 'Atena', nacao: 'GR', custo: 5, atk: 5, vida
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Aquiles ── */
@@ -149,6 +163,3 @@ arUnidade({ id: 'a_gr_heracles3', nome: 'Héracles, Herói dos Deuses', nacao: '
 assinar({ id: 'a_gr_leao', nome: 'Punho do Leão de Nemeia', nacao: 'GR', custo: 3, velocidade: 'rapida', icone: '🦁', arte: 'a_gr_leao', texto: 'Cause 4 de dano a um inimigo e cure 2 da sua Capital.', alvo: { quem: 'inimigo' }, efeito: (u, alvo) => { AR.dano(alvo, 4, null); AR.curarCapital(AR.dono(u), 2); } });
 arHeroi({ niveis: ['a_gr_heracles', 'a_gr_heracles2', 'a_gr_heracles3'], assinatura: 'a_gr_leao', missao: 'derrubar' });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_gr_aquiles', 'a_gr_heracles', { nome: 'Heróis da Ilíada', icone: '🏛️', arte: 'a_fus_iliada', kw: ['furia', 'rapido'], texto: 'Fusão especial: Fúria e Golpe Rápido.' });
-arFusao('a_gr_espartano', 'a_gr_hoplita', { nome: 'Falange de Esparta', icone: '🪖', arte: 'a_fus_falange', kw: ['robusto', 'vigia'], texto: 'Fusão especial: Robusto e Vigia.' });

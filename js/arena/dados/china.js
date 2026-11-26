@@ -37,6 +37,20 @@ AR_DECKS.cn = {
     '🐉 <b>Animais do ano:</b> têm +1 de Ataque, o primeiro da rodada custa 1 a menos e a <b>Bênção</b> dele fica pronta (1 vez por ano, sem passar a vez).',
     '🎊 <b>Celebrar:</b> a China escolhe e gira o ano; celebrar anos diferentes (2, 4, 6, 7 e 9) avança a Saga.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'A Roda do Zodíaco gira: cada rodada é o ano de um animal. Os seus Animais do ano ficam mais fortes, mais baratos e liberam a Bênção. Celebre 9 anos diferentes e o Dragão Celestial desce.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'O Galo busca o Templo do Céu ou a Roda; a Cabra busca um Animal do ano. Jogue o Animal do ano: ele custa 1 a menos.'],
+      ['Meio', 'Use o Decreto do Ano (Poder, 1 de Influência) para escolher o ano do Animal que você tem na mão. Toque no ☯ para usar a Bênção dele.'],
+      ['Final', 'Sun Wukong escolhe o ano e Mulan comanda o ataque. o Festival das Lanternas e A Arte da Guerra deixam o exército grande.'],
+    ],
+    chave: ['a_cn_galo', 'a_cn_cabra', 'a_cn_roda', 'a_cn_wukong', 'a_cn_lanternas'],
+    cuidado: [
+      'A lei do ano vale só para a China; o rival não ganha nada com ela.',
+      'Cada ano diferente celebrado avança a Saga: varie os anos.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_cn_wukong', 'a_cn_mulan'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -177,7 +191,7 @@ arUnidade({ id: 'a_cn_terracota', nome: 'Guerreiro de Terracota', nacao: 'CN', c
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Sun Wukong ── */
@@ -197,7 +211,3 @@ arUnidade({ id: 'a_cn_mulan3', nome: 'Mulan, a Fênix de Wei', nacao: 'CN', cust
 assinar({ id: 'a_cn_carga', nome: 'Carga de Mulan', nacao: 'CN', custo: 3, velocidade: 'rapida', icone: '🐎', arte: 'a_cn_carga', texto: 'Seus aliados ganham +1/+1 nesta rodada; os Animais do ano, +2/+2.', efeito: u => { for (const x of AR.aliados(AR.dono(u))) { const n = AR.doAno(x) ? 2 : 1; AR.buff(x, n, n, true); } } });
 arHeroi({ niveis: ['a_cn_mulan', 'a_cn_mulan2', 'a_cn_mulan3'], assinatura: 'a_cn_carga', missao: 'ataque' });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_cn_tigre', 'a_cn_dragao', { nome: 'Yin e Yang', icone: '☯️', arte: 'a_fus_yinyang', kw: ['barreira', 'esmagar'], todosSignos: true, texto: 'Fusão especial: todo ano é o ano dele. Barreira a cada rodada, Esmagar e Fúria.' });
-arFusao('a_cn_cavalo', 'a_cn_mulan', { nome: 'Cavalaria de Mulan', icone: '🐎', arte: 'a_fus_mulan', kw: ['rapido', 'robusto'], texto: 'Fusão especial: Acelerado, Desafio e Robusto.' });
-arFusao('a_cn_coelho', 'a_cn_rato', { nome: 'Corte da Lua', icone: '🌕', arte: 'a_fus_lua', kw: ['regenera', 'drenar'], texto: 'Fusão especial: Elusivo, Golpe Rápido, Regeneração e Drenar.' });

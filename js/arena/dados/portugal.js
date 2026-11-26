@@ -21,6 +21,20 @@ AR_DECKS.pt = {
     '🧭 <b>Descobrir:</b> veja 3 cartas de Portugal e escolha 1 para a mão. Cada Descoberta é uma viagem na rota da Saga (Bojador, Açores, Boa Esperança, Índias e Vera Cruz).',
     '💧 <b>Saudade:</b> sobe a cada aliado seu que cai e fortalece o Fado.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Navegue descobrindo cartas: cada Descoberta avança uma etapa da rota (Bojador, Açores, Boa Esperança, Índias, Vera Cruz). Quem cai vira Saudade, que fortalece o Fado.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'Cartógrafo e Astrolábio Descobrem cedo. Romeira cura e segura os primeiros ataques.'],
+      ['Meio', 'Caravela e Galeão Descobrem e ainda deixam corpo em campo. O Infante D. Henrique é Herói: Descubra com ele em campo para subir de nível.'],
+      ['Final', 'Vasco da Gama acerta a Capital; o Fado causa dano igual à Saudade. O Mar Tenebroso fere todas as unidades: use quando o rival tiver mais em campo que você.'],
+    ],
+    chave: ['a_pt_cartografo', 'a_pt_astrolabio', 'a_pt_caravela', 'a_pt_henrique', 'a_pt_fado'],
+    cuidado: [
+      'Descobrir escolhe entre 3 cartas: pegue o que falta no momento (defesa, dano ou corpo em campo).',
+      'O Mar Tenebroso também acerta as suas unidades.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_pt_henrique', 'a_pt_vasco'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -51,7 +65,7 @@ AR_DECKS.pt = {
 /* ═════════════════════ Líder ═════════════════════ */
 AR_LIDERES.pt = {
   id: 'pt', nome: 'Luís de Camões', nacao: 'PT', icone: '✒️', carta: 'a_pt_camoes',
-  poder: { nome: 'Verso Épico', custo: 2, texto: 'Um aliado ganha +1/+1 permanente.', alvo: { quem: 'aliado' }, efeito: (p, alvo) => AR.buff(alvo, 1, 1, false) },
+  poder: { nome: 'Verso Épico', custo: 1, texto: 'Um aliado ganha +1/+1 permanente.', alvo: { quem: 'aliado' }, efeito: (p, alvo) => AR.buff(alvo, 1, 1, false) },
   poder2: { nome: 'Os Lusíadas', custo: 1, texto: 'Um aliado ganha +1/+1 permanente e Barreira nesta rodada.', alvo: { quem: 'aliado' },
     efeito: (p, alvo) => { AR.buff(alvo, 1, 1, false); AR.darKw(alvo, 'barreira', true); } },
   ascensao: { texto: 'Complete 3 Capítulos da Saga.', evento: 'saga', alvo: 3 },
@@ -117,7 +131,7 @@ arUnidade({ id: 'a_pt_camoes', nome: 'Luís de Camões', nacao: 'PT', custo: 5, 
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Infante D. Henrique ── */
@@ -137,6 +151,3 @@ arUnidade({ id: 'a_pt_vasco3', nome: 'Vasco, Vice-Rei da Índia', nacao: 'PT', c
 assinar({ id: 'a_pt_especiarias', nome: 'Especiarias do Oriente', nacao: 'PT', custo: 3, velocidade: 'lenta', icone: '🌶️', arte: 'a_pt_especiarias', texto: 'Cure 4 da sua Capital e compre 2 cartas.', efeito: u => { const p = AR.dono(u); AR.curarCapital(p, 4); AR.comprar(p, 2); } });
 arHeroi({ niveis: ['a_pt_vasco', 'a_pt_vasco2', 'a_pt_vasco3'], assinatura: 'a_pt_especiarias', missao: 'capital' });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_pt_henrique', 'a_pt_padeira', { nome: 'Heroínas de Aljubarrota', icone: '🥖', arte: 'a_pt_padeira', kw: ['robusto'], texto: 'Fusão especial: Robusto.' });
-arFusao('a_pt_caravela', 'a_pt_vasco', { nome: 'Frota das Índias', icone: '🚢', arte: 'a_pt_caravela', kw: ['robusto'], texto: 'Fusão especial: Robusto.' });

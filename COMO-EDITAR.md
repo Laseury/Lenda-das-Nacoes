@@ -12,8 +12,8 @@ Não precisa instalar nada para editar. Para conferir os decks com o `Conferir d
 | Quero mexer em… | Arquivo |
 |---|---|
 | As cartas e a lista de 40 de um deck | `js/arena/dados/<nação>.js` (`brasil.js`, `japao.js`, `espanha.js`, `grecia.js`, `nordicos.js`, `portugal.js`, `pangeia.js`, `irlanda.js`, `china.js`, `russia.js`) |
-| Líder, Saga, Heróis e Fusões de um deck | o mesmo arquivo da nação |
-| Números das regras (Capital 20, mão, Influência, Mercado, Fusão, XP dos Heróis…) | `js/arena/dados/ajustes.js` |
+| Líder, Saga e Heróis de um deck | o mesmo arquivo da nação |
+| Números das regras (Capital 20, mão, Influência, Mercado, XP dos Heróis…) | `js/arena/dados/ajustes.js` |
 | Palavras-chave (Elusivo, Robusto…) e as funções que criam cartas | `js/arena/dados/base.js` |
 | Eventos Mundiais, a Peste e as cartas do Mercado | `js/arena/dados/mundo.js` |
 | Imagens das cartas | pasta `arte/` (depois rode `Atualizar artes.bat`) |
@@ -23,7 +23,7 @@ Não precisa instalar nada para editar. Para conferir os decks com o `Conferir d
 | Regras do jogo (motor), CPU, tela, online | `js/arena/motor.js`, `ia.js`, `mesa.js`, `rede.js`: código, mexa só se souber |
 | Modo Clássico | `js/classico/` (as cartas em `js/classico/cartas/`) |
 
-Cada arquivo de nação tem sempre a mesma ordem: **Deck → Líder → Saga → Unidades → Táticas → Segredos/Contínuas → Fichas → Heróis → Fusões**.
+Cada arquivo de nação tem sempre a mesma ordem: **Deck → Líder → Saga → Unidades → Táticas → Segredos/Contínuas → Fichas → Heróis**.
 
 ---
 
@@ -114,14 +114,10 @@ Cada Herói são 3 cartas (nível 1, 2 e 3) + 1 Assinatura, e uma linha:
 arHeroi({ niveis: ['a_br_zumbi', 'a_br_zumbi2', 'a_br_zumbi3'], assinatura: 'a_br_quilombo', missao: 'bando', facil: true });
 ```
 
-- `missao`: o que dá XP extra: `'derrubar'`, `'sobreviver'`, `'duelo'`, `'capital'`, `'bando'`, `'descobrir'`, `'eras'`, `'congelar'`, `'ataque'`, `'ano'` (a lista com o texto de cada uma está em `arMissao`, no `base.js`).
+- `missao`: o que dá XP extra: `'derrubar'`, `'sobreviver'`, `'duelo'`, `'capital'`, `'bando'`, `'descobrir'`, `'eras'`, `'congelar'` (pôr Gelo), `'ataque'`, `'ano'`, `'recompensa'` (a lista com o texto de cada uma está em `arMissao`, no `base.js`).
 - `facil: true` para missões que acontecem quase toda rodada (pedem mais XP).
 - Só o nível 1 vai na lista do deck. Ponha o id dele também em `herois: [...]` do deck (no máximo 2).
 - O XP de cada nível fica em `ajustes.js`. Os Heróis chegam à mão pela compra normal; para voltar a trazê-los de graça em certas rodadas, ponha as rodadas em `chamado: [2, 5]`.
-
-### Fusões especiais
-
-`arFusao('id A', 'id B', { nome, icone, arte, kw: [...], texto })`: quando essas duas se fundem, nascem com esse nome e essas palavras-chave. Os outros pares também se fundem, só que sem bônus.
 
 ### Regras gerais
 

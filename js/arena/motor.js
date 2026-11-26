@@ -28,7 +28,8 @@
  * Ano do Animal (China): se um deck tem roda, cada rodada é o ano de um signo (G.ano) e a lei dele vale só para os Chineses desse deck (AR_SIGNOS, api.chines).
  * Animais do ano (d.signo): +1 de Ataque, o 1º de cada rodada custa 1 a menos, e liberam a Bênção (d.bencao, 1 vez por ano: u.bencaoAno).
  * Heróis (AR_HEROIS): até 2 por deck, 3 níveis; ganham XP em campo (1 por rodada e mais com a missão), guardado em p.herois. Caiu: volta ao deck.
- * Gelo (Rússia): u.gelo tira 1 de Ataque cada; com 3 ou mais a unidade está Congelada (não ataca nem bloqueia). Derrete 1 por rodada.
+ * Gelo (Rússia): u.gelo tira 1 de Vida cada, sem limite. Derrete 1 por rodada. Quem cai por causa do Gelo vira um Estilhaço de Gelo
+ * na mão do dono: custo 0; na mão, fere cada unidade que ele invoca; ao ser jogado, fere a Capital dele (o valor soma as quedas da rodada).
  * Pangeia: deck para quem todo Evento Mundial é bênção (api.bencao / api.sofre). Precipitar revela o próximo Evento na hora.
  * api.simular(i, fn): roda fn num clone do duelo, visto pelo jogador i (o que ele não vê é sorteado). É o que a IA usa para pensar.
  * Eventos Mundiais: a partir da rodada 3 e a cada 3 rodadas, um Evento muda as regras para os dois até o próximo.
@@ -93,12 +94,13 @@ const AR = (() => {
   api.bloqueando = u => !!G.combate && G.combate.pares.some(x => x.b === u);
   api.emCombate = u => api.emAtaque(u) || api.bloqueando(u);
   api.atk = u => {
-    let v = u.d.atk + u.permAtk + u.tempAtk - (u.gelo || 0);
+    let v = u.d.atk + u.permAtk + u.tempAtk;
+    if (api.temKw(u, 'procurado') && G.jog.some(q => q.i !== u.dono && api.temLei(q, 'cartazes'))) v -= 1;
     if (api.sofre(G.jog[u.dono], 'inverno')) v -= 1;
     if (api.emAtaque(u)) v += api.bencao(G.jog[u.dono], 'ventos') ? 2 : api.mundo() === 'ventos' ? 1 : 0;
     if (api.temKw(u, 'ginga') && api.emAtaque(u) && G.combate.pares.filter(x => !x.a.atordoado).length >= GINGA_MIN) v += 1;
     const p = G.jog[u.dono];
-    if (api.temLei(p, 'buleria')) v += 1;
+    if (api.temLei(p, 'buleria') && G.combate && api.emAtaque(u)) v += 1;
     if (api.temLei(p, 'hidra')) v += 1;
     if (api.temLei(p, 'indias')) v += 1;
     if (api.temLei(p, 'rodinia')) v += 1;
@@ -122,8 +124,8 @@ const AR = (() => {
   };
   const equipVale = u => (G.jog[u.dono].gaeAsc && u.equip.d.asc ? u.equip.d.asc : u.equip.d);
   api.gaeAtiva = u => !!(u && u.equip && G.jog[u.dono].gaeAsc);
-  api.vidaMax = u => { const p = G.jog[u.dono]; return u.d.vida + u.permVida + u.tempVida + (u.equip ? equipVale(u).vida : 0) + (api.bencao(p, 'inverno') ? 1 : 0) + (api.temLei(p, 'pantalassa') ? 1 : 0) + (api.temLei(p, 'taiga') ? 1 : 0) + ((u.d.signo || u.d.todosSignos) && api.temLei(p, 'jade4') ? 1 : 0) + (api.temLei(p, 'hipolita') ? 1 : 0) + (api.temLei(p, 'alegoria') ? 1 : 0) + (u.id === 'a_br_passista' && api.temLei(p, 'comissao') ? 1 : 0) + p.continuas.reduce((n, k) => n + (k.d.auraVida ? k.d.auraVida(u, p) : 0), 0) + (u.d.tentaculo ? api.crescimento(p) : 0); };
-  api.vida = u => api.vidaMax(u) - u.dano;
+  api.vidaMax = u => { const p = G.jog[u.dono]; return (api.temLei(p, 'trem') ? 1 : 0) + u.d.vida + u.permVida + u.tempVida + (u.equip ? equipVale(u).vida : 0) + (api.bencao(p, 'inverno') ? 1 : 0) + (api.temLei(p, 'pantalassa') ? 1 : 0) + (api.temLei(p, 'taiga') ? 1 : 0) + ((u.d.signo || u.d.todosSignos) && api.temLei(p, 'jade4') ? 1 : 0) + (api.temLei(p, 'hipolita') ? 1 : 0) + (api.temLei(p, 'alegoria') ? 1 : 0) + (u.id === 'a_br_passista' && api.temLei(p, 'comissao') ? 1 : 0) + p.continuas.reduce((n, k) => n + (k.d.auraVida ? k.d.auraVida(u, p) : 0), 0) + (u.d.tentaculo ? api.crescimento(p) : 0); };
+  api.vida = u => api.vidaMax(u) - u.dano - (u.gelo || 0);
 
   /* ───────── eventos: Saga, Feitos e unidades que reagem ───────── */
   function evento(tipo, dados) {
@@ -313,32 +315,23 @@ const AR = (() => {
     evento('agitar', { p, n, total: p.agitado });
   };
   /* ───────── Gelo (Rússia) ───────── */
-  const GELO_MAX = A.geloMax, CONGELA = A.congela;
   /* O Ano do Animal só vale para o dono da Roda e os Chineses dele. */
   const daRoda = p => !!AR_DECKS[p.deckId].roda;
   api.chines = u => u.d.nacao === 'CN' && daRoda(G.jog[u.dono]);
-  api.congelada = u => (u.gelo || 0) >= CONGELA;
+  /* Ninguém congela mais: o Gelo tira Vida. (Mantido para as cartas antigas que perguntam.) */
+  api.congelada = () => false;
   api.gelar = (p, u, n = 1) => {
     if (!G || G.vencedor !== null || !u || u.d.peste || !api.noCampo(u)) return;
     const antes = u.gelo || 0;
-    /* O Campeão nunca congela por inteiro: guarda no máximo 2 de Gelo. O Gelo que passaria disso vira
-     * Queimadura de Frio: -1 de Ataque para sempre (1 por efeito), e conta como Frio para a Saga russa. */
-    const teto = u.d.campeao ? CONGELA - 1 : GELO_MAX;
-    const queima = u.d.campeao && antes + n > teto ? 1 : 0;
-    u.gelo = Math.max(antes, Math.min(teto, antes + n));
-    const k = u.gelo - antes;
-    if (!k && !queima) return;
-    const congelou = antes < CONGELA && u.gelo >= CONGELA;
-    if (k) { log(`${u.d.nome} recebe ${k} de Gelo${congelou ? ' e CONGELA' : ''}.`, 'efeito'); fx('gelo', { u, n: k, congelou }); }
-    if (queima) {
-      u.permAtk -= queima;
-      log(`${u.d.nome} não congela, mas sofre Queimadura de Frio: -${queima} de Ataque para sempre.`, 'efeito');
-      fx('buff', { u, a: -queima, v: 0 });
-      fx('gelo', { u, n: 0, queima: true });
-    }
+    /* Sem limite: cada Gelo tira 1 de Vida. */
+    if (n <= 0) return;
+    u.gelo = antes + n;
+    const k = n, congelou = false;
+    log(`${u.d.nome} recebe ${k} de Gelo (-${k} de Vida).`, 'efeito');
+    fx('gelo', { u, n: k });
     if (u.dono === p.i) return;
-    p.frio = (p.frio || 0) + k + queima;
-    evento('gelo', { p, u, n: k + queima, congelou });
+    p.frio = (p.frio || 0) + k;
+    evento('gelo', { p, u, n: k, congelou });
   };
   /* ───────── Descobrir: 3 cartas da nação, escolha 1 para a mão ───────── */
   const descobrivel = (d, nacao) => d.nacao === nacao && !d.ficha && !d.climax && !d.doLider && !d.desperto && !d.assinatura && !(d.kw || []).includes('lenda') && (d.tipo === 'unidade' || d.tipo === 'tatica');
@@ -399,7 +392,7 @@ const AR = (() => {
       return;
     }
     (temp ? u.kwTemp : u.kw).add(k);
-    if (k === 'barreira') u.barreiraGasta = false;
+    if (k === 'barreira') { u.barreiraGasta = false; fx('ganhaBarreira', { u }); }
     log(`${u.d.nome} ganha ${AR_KW[k].nome}${temp ? ' nesta rodada' : ''}.`);
   };
   api.atordoar = u => {
@@ -419,7 +412,8 @@ const AR = (() => {
     if (!u || !api.noCampo(u) || n <= 0) return 0;
     if (api.temKw(u, 'barreira')) { u.barreiraGasta = true; log(`A Barreira de ${u.d.nome} anula o dano.`); fx('barreira', { u }); evento('barreira', { u, p: G.jog[u.dono] }); return 0; }
     if (G.ano === 'serpente' && fonte && fonte.d && fonte.dono !== u.dono && api.chines(fonte)) n += 1;
-    if (api.congelada(u) && api.temLei(api.oponente(G.jog[u.dono]), 'geada')) n += 1;
+    if ((u.gelo || 0) > 0 && api.temLei(api.oponente(G.jog[u.dono]), 'geada')) n += 1;
+    if (api.temKw(u, 'procurado') && G.jog.some(q => q.i !== u.dono && api.temLei(q, 'diligencia'))) n += 1;
     if (api.temKw(u, 'robusto')) n = Math.max(0, n - 1);
     if (!n) return 0;
     u.dano += n;
@@ -430,9 +424,11 @@ const AR = (() => {
   };
   api.danoCapital = (p, n, fonte = null) => {
     if (n <= 0 || G.vencedor !== null) return;
-    if (fonte && G.combate && G.combate.nevoa === p.i) { log(`A Névoa protege a Capital de ${p.nome}.`); return; }
+    const n0 = n;
+    if (fonte && G.combate && G.combate.nevoa === p.i) { log(`A Névoa protege a Capital de ${p.nome}.`); fx('protege', { p, evitado: n0, tudo: true }); return; }
     if (fonte) n -= p.continuas.reduce((x, k) => x + (k.d.escudoCapital ? k.d.escudoCapital(p) : 0), 0);
     if (fonte && G.ano === 'cao' && daRoda(p)) n -= 1;
+    if (n < n0) fx('protege', { p, evitado: Math.min(n0, n0 - n), tudo: n <= 0 });
     if (n <= 0) { log(`O escudo de ${p.nome} apara o golpe na Capital.`); return; }
     p.capital -= n;
     log(`${capDe(p)} sofre ${n} de dano.`, 'dano');
@@ -548,6 +544,8 @@ const AR = (() => {
     fx('entrar', { u, daMao });
     if (api.temLei(api.oponente(p), 'neve') && !u.d.climax) api.gelar(api.oponente(p), u, 1);
     if (p.peste && !u.d.climax) { log(`A Peste atinge ${u.d.nome}.`, 'dano'); api.dano(u, 1, null); }
+    const est = u.d.climax ? 0 : api.estilhacosNaMao(p);
+    if (est) { log(`Os Estilhaços de Gelo na mão de ${p.nome} ferem ${u.d.nome}: ${est} de dano.`, 'dano'); api.dano(u, est, null); }
     return u;
   }
   api.invocarFicha = (p, id) => {
@@ -582,6 +580,30 @@ const AR = (() => {
     else if (u.d.fusao) log(`${u.d.nome} se desfaz: a Fusão não volta para a mão.`);
     else if (!u.d.ficha && !u.d.climax && p.mao.length < MAO_MAX) p.mao.push(carta(u.id, p.i));
   };
+  /* Velho Oeste: Recompensa por um Procurado que caiu. +1 de Influência na hora (pode passar do teto), compra 1 e avança a Saga. */
+  function cobrarRecompensa(q, u) {
+    q.ouro = (q.ouro || 0) + 1;
+    q.inf += 1;
+    log(`Recompensa! ${q.nome} cobra a cabeça de ${u.d.nome}: +1 de Influência e 1 carta (${q.ouro}).`, 'saga');
+    fx('recompensa', { p: q, u, n: q.ouro });
+    api.comprar(q, 1);
+    if (api.temLei(q, 'estrela')) api.danoCapital(api.oponente(q), 1);
+    evento('recompensa', { p: q, u });
+  }
+  /* Estilhaço de Gelo: a carta é da mão do dono de quem caiu pelo frio. As quedas da mesma rodada somam numa carta só. */
+  const defEstilhaco = n => ({ ...AR_CARTAS.a_ru_lasca, valor: n, nome: `Estilhaço de Gelo (${n})`,
+    texto: `Custo 0. Ao jogar: sua Capital sofre ${n} de dano. Enquanto estiver na sua mão, cada unidade que você invocar sofre ${n} de dano.` });
+  api.estilhacosNaMao = p => p.mao.reduce((s, c) => s + (c.d.estilhaco ? c.d.valor || 1 : 0), 0);
+  function darEstilhaco(p) {
+    const c = p.mao.find(x => x.d.estilhaco && x.rodadaEstilhaco === G.rodada);
+    if (c) { c.d = defEstilhaco((c.d.valor || 1) + 1); log(`O Estilhaço de Gelo de ${p.nome} cresce: ${c.d.valor}.`, 'efeito'); fx('estilhaco', { p, n: c.d.valor }); return; }
+    if (p.mao.length >= MAO_MAX) { log(`${p.nome} está com a mão cheia: o Estilhaço de Gelo se perde.`); return; }
+    const nova = carta('a_ru_lasca', p.i);
+    nova.d = defEstilhaco(1); nova.rodadaEstilhaco = G.rodada;
+    p.mao.push(nova);
+    log(`${p.nome} recebe um Estilhaço de Gelo na mão.`, 'efeito');
+    fx('estilhaco', { p, n: 1 });
+  }
   function morrer(u) {
     const p = api.dono(u);
     const k = p.campo.indexOf(u);
@@ -593,6 +615,9 @@ const AR = (() => {
     if (eHeroi) { p.deck.push(carta(u.id, p.i)); embaralhar(p.deck); log(`${u.d.nome} volta ao deck de ${p.nome} e guarda o nível ${u.d.heroi.nivel}.`, 'lider'); }
     log(`${u.d.nome} cai.`, 'morte');
     fx('morte', { u });
+    if (api.temKw(u, 'procurado')) for (const q of G.jog) if (q !== p && AR_DECKS[q.deckId].recompensa) cobrarRecompensa(q, u);
+    /* caiu por causa do Gelo (sem ele, ainda teria Vida): vira Estilhaço na mão do dono */
+    if ((u.gelo || 0) > 0 && !u.d.peste && api.vidaMax(u) - u.dano > 0) darEstilhaco(p);
     if (u.d.campeao) guardarCampeao(u, true);
     if (AR_DECKS[p.deckId].saudade && !u.d.ficha) { p.saudade = (p.saudade || 0) + 1; log(`Saudade de ${p.nome}: ${p.saudade}.`, 'saga'); fx('saudade', { p }); }
     if (u.d.ultimo) { log(`Último Suspiro de ${u.d.nome}.`); u.d.ultimo(u); }
@@ -873,12 +898,12 @@ const AR = (() => {
 
   /* ───────── combate ───────── */
   api.podeAtacar = p => api.minhaVez(p) && G.fase === 'acao' && !G.pilha.length && p.campo.some(u => api.podeSerAtacante(u));
-  /* Investida do Campeão: ataca sozinho mesmo sem o Estandarte. Custa 3 de Influência; na mesma rodada, a seguinte custa 6, depois 9… */
+  /* Investida do Campeão: ataca sozinho mesmo sem o Estandarte. Custa 5 de Influência; na mesma rodada, a seguinte custa 8, depois 11… */
   api.ataqueNormal = p => G.estandarte === p.i && !G.atacou;
-  api.custoInvestida = p => 3 + 3 * (p.investidas || 0);
-  api.podeSerAtacante = u => !u.atordoado && !api.congelada(u) && api.atk(u) > 0 && (api.ataqueNormal(G.jog[u.dono]) || (!!u.d.campeao && !api.entorpecido(u) && G.jog[u.dono].inf >= api.custoInvestida(G.jog[u.dono])));
+  api.custoInvestida = p => 5 + 3 * (p.investidas || 0);
+  api.podeSerAtacante = u => !u.atordoado && !api.congelada(u) && api.atk(u) > 0 && (api.ataqueNormal(G.jog[u.dono]) || (!!u.d.campeao && G.jog[u.dono].inf >= api.custoInvestida(G.jog[u.dono])));
   /* Cú Chulainn com o Gelo no máximo dele (2) fica Entorpecido: não Investe sozinho; só ataca com o Estandarte. */
-  api.entorpecido = u => !!u.d.campeao && (u.gelo || 0) >= CONGELA - 1;
+  api.entorpecido = () => false;
   /* Quantas unidades p pode pôr num ataque. */
   api.limiteAtaque = p => {
     const r = api.oponente(p);
@@ -915,6 +940,10 @@ const AR = (() => {
     if (atacantes.length >= 3) progresso(p, 'ataque3');
     if (atacantes.length >= 3 && api.temLei(p, 'javali')) { log('Lei do Javali: o ataque em bando rende 1 carta.'); api.comprar(p, 1); }
     fx('ataque', { p });
+    /* Clímax que vence ao atacar (El Duende): declarou o ataque, a partida acaba. */
+    if (atacantes.length >= GINGA_MIN) for (const u of atacantes) if (api.temKw(u, 'ginga')) api.buff(u, 0, 1, true);
+    const final = atacantes.find(u => u.d.venceAoAtacar);
+    if (final) { fim(p.i, final.d.venceAoAtacar); return true; }
     if (api.temLei(p, 'tormenta')) api.agitar(p, 1);
     if (atacantes.length >= 3 && api.temLei(p, 'bateria')) api.invocar(p, 'a_br_passista');
     evento('ataque', { p, atacantes });
@@ -1058,7 +1087,7 @@ const AR = (() => {
     G.fase = 'acao';
     G.passes = 0;
     G.vez = G.estandarte;
-    /* El Duende (e outros Clímax de sobrevivência): se ainda estiver em campo numa rodada nova, vence. */
+    /* Clímax de sobrevivência (campo venceSeSobreviver): se ainda estiver em campo numa rodada nova, vence. (El Duende agora vence ao atacar.) */
     for (const p of G.jog) {
       const u = p.campo.find(x => x.d.venceSeSobreviver && x.entrou < G.rodada);
       if (u) { fim(p.i, u.d.venceSeSobreviver); return; }
@@ -1185,33 +1214,40 @@ const AR = (() => {
   const trocaveis = p => p.mao.filter(c => !c.d.lendaria);
   api.podeTrocarMao = p => trocaveis(p).length > MAO_MIN;
   api.cartasDaTroca = p => trocaveis(p).length - 1;
+  /* Os dois jogadores trocam a mão AO MESMO TEMPO (P.quem = quem ainda decide). Cada um embaralha com o próprio
+   * sorteio (p.sorteTroca), então a ordem em que as decisões chegam pela rede não muda nada. */
+  api.decideTroca = p => { const P = G && G.pendente; return !!P && P.tipo === 'troca' && (P.quem || [P.p]).includes(p.i); };
+  function saiDaTroca(p) {
+    const P = G.pendente;
+    P.quem = (P.quem || [P.p]).filter(i => i !== p.i);
+    if (P.quem.length) P.p = P.quem[0]; else proximaPendencia();
+  }
   function trocar(p) {
     const xs = trocaveis(p), n = xs.length - 1;
     p.mao = p.mao.filter(c => c.d.lendaria);
     p.deck.push(...xs);
-    embaralhar(p.deck);
+    const rnd = p.sorteTroca || api.rand;
+    for (let i = p.deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [p.deck[i], p.deck[j]] = [p.deck[j], p.deck[i]]; }
     p.mao.push(...p.deck.splice(0, n));
     log(`${p.nome} devolve a mão e compra ${n}.`);
     fx('trocaMao', { p, n });
   }
   api.trocarMao = p => {
-    const P = G && G.pendente;
-    if (!P || P.tipo !== 'troca' || P.p !== p.i || !api.podeTrocarMao(p)) return false;
+    if (!api.decideTroca(p) || !api.podeTrocarMao(p)) return false;
     trocar(p);
-    if (!api.podeTrocarMao(p)) proximaPendencia();
+    if (!api.podeTrocarMao(p)) saiDaTroca(p);
     return true;
   };
   api.manterMao = p => {
-    const P = G && G.pendente;
-    if (!P || P.tipo !== 'troca' || P.p !== p.i) return false;
-    proximaPendencia();
+    if (!api.decideTroca(p)) return false;
+    saiDaTroca(p);
     return true;
   };
 
   /* ───── Fusão ───── */
   const FUSAO_CUSTO = A.fusaoCusto, FUSAO_MAX = A.fusaoMax;
   api.FUSAO_CUSTO = FUSAO_CUSTO;
-  api.podeFundir = p => api.minhaVez(p) && G.fase === 'acao' && !G.pilha.length && p.inf >= FUSAO_CUSTO && p.fusaoRodada !== G.rodada && api.fundiveis(p).length >= 2;
+  api.podeFundir = p => !!A.fusao && api.minhaVez(p) && G.fase === 'acao' && !G.pilha.length && p.inf >= FUSAO_CUSTO && p.fusaoRodada !== G.rodada && api.fundiveis(p).length >= 2;
   api.fundiveis = p => p.campo.filter(u => !u.d.climax && !u.d.ficha && !u.d.fusao && !u.d.tentaculo && !u.d.campeao && !api.emCombate(u));
   const idFusao = u => (u.d.heroi ? u.d.heroi.base : u.id);
   api.receitaFusao = (a, b) => AR_FUSOES[[idFusao(a), idFusao(b)].sort().join('+')] || null;
@@ -1354,9 +1390,10 @@ const AR = (() => {
     for (const p of G.jog) { for (const id of AR_DECKS[p.deckId].inicial || []) p.mao.push(carta(id, p.i)); api.comprar(p, A.maoInicial); }
     log(`${AR_DECKS[deckA].nome} contra ${AR_DECKS[deckB].nome}.`, 'rodada');
     novaRodada();
-    for (const p of G.jog) {
-      if (p.ia) { while (api.podeTrocarMao(p) && typeof AR_IA !== 'undefined' && AR_IA.querTrocar(p)) trocar(p); } else pender({ tipo: 'troca', p: p.i });
-    }
+    for (const p of G.jog) p.sorteTroca = opcoes.semente != null ? sorteio((opcoes.semente ^ Math.imul(0x9E3779B1, p.i + 1)) >>> 0) : null;
+    for (const p of G.jog) if (p.ia) { while (api.podeTrocarMao(p) && typeof AR_IA !== 'undefined' && AR_IA.querTrocar(p)) trocar(p); }
+    const quem = G.jog.filter(p => !p.ia).map(p => p.i);
+    if (quem.length) pender({ tipo: 'troca', p: quem[0], quem });
     return G;
   };
   api.encerrar = () => { G = null; };
@@ -1385,6 +1422,8 @@ const AR = (() => {
     return Object.fromEntries(Object.entries(v.O || {}).map(([k, x]) => [k, des(x)]));
   };
   api.resumo = () => G ? [G.rodada, G.vez, G.fase, uid, ...G.jog.map(p => [p.capital, p.inf, p.reserva, p.mao.length, p.deck.length, p.campo.map(u => u.uid + ':' + api.atk(u) + '/' + api.vida(u)).join(',')].join('-'))].join('|') : '';
+  const DA_TROCA = ['trocarMao', 'manterMao'];
+  const resumoTroca = p => [p.i, p.mao.map(c => c.uid).join(','), p.deck.map(c => c.uid).join(',')].join('|');
   let recebendo = false, dentro = 0;
   for (const nome of ACOES) {
     const original = api[nome];
@@ -1394,7 +1433,7 @@ const AR = (() => {
       dentro++;
       let r;
       try { r = original(...args); } finally { dentro--; }
-      if (manda && r) api.rede.enviar({ f: nome, a, h: G === g ? api.resumo() : '' });
+      if (manda && r) api.rede.enviar({ f: nome, a, h: G === g ? (DA_TROCA.includes(nome) ? resumoTroca(args[0]) : api.resumo()) : '' });
       return r;
     };
   }
@@ -1409,7 +1448,7 @@ const AR = (() => {
     recebendo = true;
     let r = false;
     try { r = api[msg.f](...args); } catch (e) { r = false; } finally { recebendo = false; }
-    return r && msg.h === api.resumo() ? 'ok' : 'perdeu';
+    return r && msg.h === (DA_TROCA.includes(msg.f) ? resumoTroca(args[0]) : api.resumo()) ? 'ok' : 'perdeu';
   };
   api.semVencedor = motivo => { if (G && G.vencedor === null) { G.vencedor = -1; G.motivo = motivo; log(motivo, 'fim'); fx('fim', { vencedor: -1, motivo }); } };
   /* ───────── simulação (a IA pensa aqui) ─────────

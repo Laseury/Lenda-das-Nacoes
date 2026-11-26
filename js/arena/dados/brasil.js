@@ -16,10 +16,24 @@ AR_DECKS.br = {
   resumo: 'Ataque em bando: cada aliado que ataca soma Batucada e o desfile avança Ala por Ala. A Ginga cresce, os Passistas se multiplicam e, no fim, o Desfile das Campeãs.',
   /* Regras especiais desta nação: aparecem no Como Jogar, na aba da nação. Pode usar <b>negrito</b>. */
   regras: [
-    '🪘 <b>Ginga:</b> unidades com Ginga ganham +1 de Ataque quando atacam junto com pelo menos 1 aliado.',
-    '🥁 <b>Batucada:</b> cada aliado que ataca soma 1. A Saga avança com 2, 4, 7, 10 e 13 de Batucada: ataque em bando.',
+    '🪘 <b>Ginga:</b> unidades com Ginga ganham +1 de Ataque e +1 de Vida (nesta rodada) quando atacam junto com pelo menos 1 aliado.',
+    '🥁 <b>Batucada:</b> cada aliado que ataca soma 1. A Saga avança com 2, 4, 6, 8 e 11 de Batucada: ataque em bando.',
     '💃 <b>Passistas:</b> fichas 2/2 com Ginga que nascem de Táticas e do Puxador de Samba e enchem o banco.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Encha o banco cedo e ataque com várias unidades juntas: a Ginga cresce em bando e cada atacante soma Batucada para o Carnaval.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'Jogue Sambista, Capoeirista e Ritmista nas rodadas baratas. Unidade no banco vale mais que Tática guardada.'],
+      ['Meio', 'Ataque com 2 ou mais sempre que tiver o Estandarte 🚩: Ginga dá +1 e cada atacante soma Batucada. O Puxador de Samba traz Passistas para engrossar o bando.'],
+      ['Final', 'Gaúcho, Mapinguari e Boitatá fecham o jogo. Com a Saga no fim, o Desfile das Campeãs dá +2/+2 a todos e cura a Capital.'],
+    ],
+    chave: ['a_br_puxador', 'a_br_ritmista', 'a_br_zumbi', 'a_br_virada', 'a_br_boitata'],
+    cuidado: [
+      'Atacar com uma unidade só desperdiça a Ginga e a Batucada.',
+      'Pororoca e Boitatá ferem todos os inimigos: guarde para quando o rival tiver o banco cheio.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_br_zumbi', 'a_br_curupira'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -62,13 +76,13 @@ AR_LIDERES.br = {
 /* ═════════════════════ Saga ═════════════════════ */
 AR_SAGAS.carnaval = {
   id: 'carnaval', arte: 'sg_carnaval', nome: 'O Carnaval', icone: '🎊', nacao: 'BR',
-  resumo: 'Cada aliado que ataca soma Batucada. O desfile avança com 2, 4, 7, 10 e 13.',
+  resumo: 'Cada aliado que ataca soma Batucada. O desfile avança com 2, 4, 6, 8 e 11.',
   marcos: [
     { id: 'comissao', limiar: 2, nome: 'Comissão de Frente', icone: '🎭', texto: 'Batucada 2.', lei: 'comissao', leiTexto: 'Seus Passistas têm +1/+1.' },
     { id: 'bateria', limiar: 4, nome: 'Bateria', icone: '🥁', texto: 'Batucada 4.', lei: 'bateria', leiTexto: 'Ao atacar com 3 ou mais, invoque um Passista.' },
-    { id: 'porta', limiar: 7, nome: 'Mestre-Sala e Porta-Bandeira', icone: '🚩', texto: 'Batucada 7.', lei: 'porta', leiTexto: 'A Ginga dá +2 de Ataque em vez de +1.' },
-    { id: 'alegoria', limiar: 10, nome: 'Carro Alegórico', icone: '🎡', texto: 'Batucada 10.', lei: 'alegoria', leiTexto: 'Seus aliados têm +1 de Vida.' },
-    { id: 'campeas', limiar: 13, nome: 'Desfile das Campeãs', icone: '🏆', texto: 'Batucada 13.', lei: null, leiTexto: 'O Brasil é campeão!' },
+    { id: 'porta', limiar: 6, nome: 'Mestre-Sala e Porta-Bandeira', icone: '🚩', texto: 'Batucada 6.', lei: 'porta', leiTexto: 'A Ginga dá +2 de Ataque em vez de +1.' },
+    { id: 'alegoria', limiar: 8, nome: 'Carro Alegórico', icone: '🎡', texto: 'Batucada 8.', lei: 'alegoria', leiTexto: 'Seus aliados têm +1 de Vida.' },
+    { id: 'campeas', limiar: 11, nome: 'Desfile das Campeãs', icone: '🏆', texto: 'Batucada 11.', lei: null, leiTexto: 'O Brasil é campeão!' },
   ],
   climaxNome: 'Desfile das Campeãs',
   climaxTexto: 'Invoque 3 Passistas, seus aliados ganham +2/+2 e cure 5 da sua Capital.',
@@ -128,7 +142,7 @@ arUnidade({ id: 'a_br_camisa10', nome: 'O Camisa 10', nacao: 'BR', custo: 5, atk
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Zumbi dos Palmares ── */
@@ -147,6 +161,3 @@ arUnidade({ id: 'a_br_curupira3', nome: 'Curupira, Espírito Ancestral', nacao: 
 assinar({ id: 'a_br_pegadas', nome: 'Pegadas ao Contrário', nacao: 'BR', custo: 3, velocidade: 'rapida', icone: '👣', arte: 'a_br_pegadas', texto: 'Um inimigo volta para a mão do dono.', alvo: { quem: 'inimigo', filtro: u => !u.d.peste && !u.d.climax }, efeito: (u, alvo) => AR.voltarMao(alvo) });
 arHeroi({ niveis: ['a_br_curupira', 'a_br_curupira2', 'a_br_curupira3'], assinatura: 'a_br_pegadas', missao: 'capital' });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_br_boitata', 'a_br_curupira', { nome: 'Guardiões da Floresta', icone: '🌳', arte: 'a_fus_guardioes', kw: ['esmagar', 'regenera'], texto: 'Fusão especial: Esmagar e Regeneração.' });
-arFusao('a_br_capoeirista', 'a_br_sambista', { nome: 'Roda de Samba', icone: '🪘', arte: 'a_fus_roda', kw: ['ginga', 'rapido'], texto: 'Fusão especial: Ginga e Golpe Rápido.' });

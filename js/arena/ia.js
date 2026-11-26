@@ -7,7 +7,7 @@
 const AR_IA = (() => {
   const ia = {};
   const fortao = p => Math.max(0, ...p.campo.map(u => AR.atk(u)));
-  const DANO = { a_cn_foguetes: 3, b_a_cn_tigre: 3, a_cn_ruyi: 3, a_jp_flecha: 4, a_jp_corte: p => fortao(p), a_es_moinhos: p => fortao(p), a_gr_leao: 4, a_ru_maca: 3, a_ru_estilhaco: 2, a_ru_strelets: 1, a_pg_elementos: () => AR.clima() === 'guerra' ? 3 : 2, a_gl_polvora: 2, a_ie_funda: 2, a_ie_duelo: p => { const c = AR.campeao(p); return c ? AR.atk(c) : 0; }, a_jp_asparco: 1, a_jp_samarco: 2, a_jp_iai: 2, a_es_seguiriya: 2, a_es_taconeo: 1, a_es_cantaor: 1, a_es_bailaora: 2, a_gr_lanca: 2, a_gr_arqueiro: 1, a_gr_zeus: 3,
+  const DANO = { a_oe_saque: 2, a_cn_foguetes: 3, b_a_cn_tigre: 3, a_cn_ruyi: 3, a_jp_flecha: 4, a_jp_corte: p => fortao(p), a_es_moinhos: p => fortao(p), a_gr_leao: 4, a_ru_maca: 3, a_ru_estilhaco: 2, a_ru_strelets: 1, a_pg_elementos: () => AR.clima() === 'guerra' ? 3 : 2, a_gl_polvora: 2, a_ie_funda: 2, a_ie_duelo: p => { const c = AR.campeao(p); return c ? AR.atk(c) : 0; }, a_jp_asparco: 1, a_jp_samarco: 2, a_jp_iai: 2, a_es_seguiriya: 2, a_es_taconeo: 1, a_es_cantaor: 1, a_es_bailaora: 2, a_gr_lanca: 2, a_gr_arqueiro: 1, a_gr_zeus: 3,
     a_pt_fado: p => Math.max(1, Math.min(3, p.saudade || 0)),
     a_no_onda: p => Math.max(2, 1 + AR.crescimento(p)) };
   const danoDe = (p, id) => typeof DANO[id] === 'function' ? DANO[id](p) : DANO[id];
@@ -139,9 +139,12 @@ const AR_IA = (() => {
     return mapa;
   }
   const G0 = () => AR.estado();
+  /* Estilhaço de Gelo na mão: joga antes de invocar, se a Capital aguenta com folga. */
+  const querEstilhaco = p => { const v = AR.estilhacosNaMao(p); return v > 0 && p.capital > v + 6 && p.mao.some(c => c.d.tipo === 'unidade' && AR.podeJogar(p, c)); };
   function valeLenta(p, c) {
     const r = AR.oponente(p);
     switch (c.id) {
+      case 'a_ru_lasca': return querEstilhaco(p);
       case 'a_br_feijoada': case 'a_jp_cha': case 'a_es_fiesta': case 'a_gr_oraculo': return p.mao.length <= 6;
       case 'a_no_hidromel': case 'a_pg_ciclo': case 'a_pg_tremor': case 'a_gl_rota': case 'a_ie_fergus': return p.mao.length <= 7;
       case 'a_cn_anonovo': return p.mao.length <= 8;
@@ -150,7 +153,7 @@ const AR_IA = (() => {
       case 'a_pt_sagres': case 'a_pt_especiarias': return p.mao.length <= 8;
       case 'a_es_moinhos': return r.campo.some(u => u.d.climax || vida(u) <= fortao(p));
       case 'a_cn_arte': return p.campo.length >= 3;
-      case 'a_ru_nevasca': return r.campo.filter(u => !AR.congelada(u)).length >= 2;
+      case 'a_ru_nevasca': return r.campo.length >= 2;
       case 'a_pg_meteoro': return r.campo.filter(u => vida(u) <= 2).length >= 2;
       case 'a_gl_chifre': return G0().estandarte === p.i && !G0().atacou && p.campo.length >= 3;
       case 'a_pt_astrolabio': return p.mao.length <= 7;
@@ -171,6 +174,8 @@ const AR_IA = (() => {
     const jogaveis = p.mao.filter(c => AR.podeJogar(p, c));
     if (bencaos(p)) return true;
     if (mercado(p)) return true;
+    const lasca = jogaveis.find(c => c.d.estilhaco);
+    if (lasca && querEstilhaco(p) && AR.jogar(p, lasca, null)) return true;
     const roda = jogaveis.find(c => c.id === 'a_cn_roda');
     if (roda && G.anoRoda !== G.rodada) { const s = ia.melhorAno(p, AR.signosDe(p)); if (s && s !== G.ano && p.campo.some(u => u.d.signo === s) && !p.campo.some(u => AR.doAno(u))) { if (AR.jogar(p, roda)) return true; } }
     if (!jogaveis.some(c => c.d.tipo === 'unidade') && ofertar(p)) return true;
@@ -350,9 +355,17 @@ const AR_IA = (() => {
     }
     return AR.passar(p);
   }
+  /* Clímax que vence ao atacar (El Duende): ataca com ele assim que puder. */
+  function golpeFinal(p) {
+    const G = AR.estado();
+    if (!G || G.vez !== p.i || G.fase !== 'acao' || G.pilha.length || G.pendente || !AR.podeAtacar(p)) return false;
+    const u = p.campo.find(x => x.d.venceAoAtacar && AR.podeSerAtacante(x));
+    return !!u && AR.atacar(p, [u], {});
+  }
   function instinto(p) {
     const G = AR.estado();
     if (!G || G.vencedor !== null || G.vez !== p.i) return false;
+    if (golpeFinal(p)) return true;
     if (G.pilha.length) return responder(p);
     if (G.fase === 'bloqueio') return bloquear(p);
     if (G.fase === 'janela') return janela(p);
@@ -368,10 +381,10 @@ const AR_IA = (() => {
     let n = a * 1.1 + Math.min(v, 8) * .9 + (a > 0 && v > 0 ? .6 : 0);
     for (const k of u.kw) n += KW_VALE[k] || 0;
     if (u.d.feito) n += 1 + 1.4 * (u.feitoN || 0);
-    if (u.d.climax) n += u.d.venceSeSobreviver ? 14 : 3;
+    if (u.d.climax) n += u.d.venceAoAtacar || u.d.venceSeSobreviver ? 14 : 3;
     if (u.d.campeao) n += 2 + (AR.gaeAtiva(u) ? 9 : u.equip ? 1 : 0);
     if (u.atordoado) n -= 1;
-    if (u.gelo) n -= AR.congelada(u) ? 1.6 : u.gelo * .25;
+    if (u.gelo) n -= u.gelo * .4;
     return n;
   }
   /* Capital vale mais quanto menor ela está. */
@@ -605,6 +618,7 @@ const AR_IA = (() => {
     if (!G || G.vencedor !== null || G.vez !== p.i) return false;
     const cfg = typeof nivel === 'object' ? nivel : NIVEIS[nivel];
     if (!cfg) return instinto(p);
+    if (golpeFinal(p)) return true;
     const it = raciocinar(p, cfg);
     let x = it.next();
     while (!x.done) x = it.next();
@@ -617,7 +631,7 @@ const AR_IA = (() => {
     const cfg = NIVEIS[nivel];
     let vivo = true;
     const ctl = { cancelar: () => { vivo = false; } };
-    if (!cfg) { pronto(() => instinto(p)); return ctl; }
+    if (!cfg || p.campo.some(x => x.d.venceAoAtacar)) { pronto(() => golpeFinal(p) || instinto(p)); return ctl; }
     const it = raciocinar(p, cfg);
     const marca = G.log.length;
     const fatia = () => {

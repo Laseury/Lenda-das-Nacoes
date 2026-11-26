@@ -18,6 +18,20 @@ AR_DECKS.jp = {
     '🎌 <b>Honra:</b> toda vez que o Japão evolui uma unidade, compra 1 carta.',
     '🏯 <b>Bushidō:</b> a Saga pede as 5 virtudes: evoluir, vencer um duelo de Desafio, uma Barreira anular dano, ter um Samurai e ter o Xogum em campo.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Plante camponeses baratos e evolua um degrau por rodada: Aspirante, Samurai e Xogum. Cada evolução cura, cresce e compra 1 (Honra).',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'Lavrador, Caçador e Pescador custam 1. Eles precisam passar uma rodada em campo antes de evoluir.'],
+      ['Meio', 'Evolua em cima deles (Aspirante custa 2, Samurai 3). O Sensei barateia as evoluções e o Dojo de Kyoto protege quem evolui.'],
+      ['Final', 'O Xogum (8/8) dá +1/+1 aos outros. Tomoe e o Rōnin são os Heróis: deixe-os vivos em campo para subirem de nível.'],
+    ],
+    chave: ['a_jp_lavrador', 'a_jp_aspespada', 'a_jp_sensei', 'a_jp_xogum', 'a_jp_kamae'],
+    cuidado: [
+      'Sem a base em campo, a carta de evolução sai cara (jogada direto).',
+      'Proteja a base com Postura Kamae (Barreira) quando o rival tentar derrubá-la antes de evoluir.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_jp_tomoe', 'a_jp_ronin'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -38,7 +52,7 @@ AR_DECKS.jp = {
     ['a_jp_miko', 2],              // Miko do Santuário (custo 3, 3/3)
     ['a_jp_ronin', 1],             // O Rōnin (custo 3, 4/3)
     ['a_jp_tomoe', 1],             // Tomoe Gozen (custo 4, 4/4)
-    ['a_jp_xogum', 2],             // Xogum, Senhor da Guerra (custo 5, 8/8)
+    ['a_jp_xogum', 2],             // Xogum, Senhor da Guerra (custo 4, 8/8)
     /* Táticas */
     ['a_jp_kamae', 2],             // Postura Kamae (custo 1)
     ['a_jp_iai', 3],               // Golpe Iaijutsu (custo 2)
@@ -51,7 +65,7 @@ AR_DECKS.jp = {
 /* ═════════════════════ Líder ═════════════════════ */
 AR_LIDERES.jp = {
   id: 'jp', nome: 'Miyamoto Musashi', nacao: 'JP', icone: '☯️', carta: 'a_jp_musashi',
-  poder: { nome: 'Lição do Mestre', custo: 2, texto: 'Um aliado ganha +1/+1 e Desafio nesta rodada.', alvo: { quem: 'aliado' },
+  poder: { nome: 'Lição do Mestre', custo: 1, texto: 'Um aliado ganha +1/+1 e Desafio nesta rodada.', alvo: { quem: 'aliado' },
     efeito: (p, alvo) => { AR.buff(alvo, 1, 1, true); AR.darKw(alvo, 'desafio', true); } },
   poder2: { nome: 'Caminho das Duas Espadas', custo: 1, texto: 'Um aliado ganha +1/+1 permanente e Desafio nesta rodada.', alvo: { quem: 'aliado' },
     efeito: (p, alvo) => { AR.buff(alvo, 1, 1, false); AR.darKw(alvo, 'desafio', true); } },
@@ -107,7 +121,7 @@ arUnidade({ id: 'a_jp_sensei', nome: 'Sensei do Dojo', nacao: 'JP', custo: 3, at
   texto: 'Suas cartas de evolução custam 1 a menos.', descontoEvolucao: 1 });
 arUnidade({ id: 'a_jp_miko', nome: 'Miko do Santuário', nacao: 'JP', custo: 3, atk: 3, vida: 3, icone: '⛩️', arte: 'a_jp_miko',
   texto: 'Grito de Guerra: compre 1 carta.', grito: AR_F.comprar(1) });
-arUnidade({ id: 'a_jp_xogum', custoDireto: 8, nome: 'Xogum, Senhor da Guerra', nacao: 'JP', custo: 5, atk: 8, vida: 8, kw: ['lenda', 'esmagar'], icone: '🏯', arte: 'a_jp_xogum',
+arUnidade({ id: 'a_jp_xogum', custoDireto: 7, nome: 'Xogum, Senhor da Guerra', nacao: 'JP', custo: 4, atk: 8, vida: 8, kw: ['lenda', 'esmagar'], icone: '🏯', arte: 'a_jp_xogum',
   evolui: ['a_jp_samespada', 'a_jp_samarco', 'a_jp_samlanca'], texto: 'Grito de Guerra: seus outros aliados ganham +1/+1.',
   grito: u => { for (const a of AR.aliados(AR.dono(u))) if (a !== u) AR.buff(a, 1, 1, false); }, estagio: 4 });
 
@@ -138,7 +152,7 @@ arUnidade({ id: 'a_jp_imperador', nome: 'Imperador do Sol Nascente', nacao: 'JP'
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Tomoe Gozen ── */
@@ -155,6 +169,3 @@ arUnidade({ id: 'a_jp_ronin3', nome: 'O Santo da Espada', nacao: 'JP', custo: 3,
 assinar({ id: 'a_jp_corte', nome: 'O Corte Único', nacao: 'JP', custo: 3, velocidade: 'rapida', icone: '🌙', arte: 'a_jp_corte', texto: 'Cause a um inimigo dano igual ao Ataque do seu aliado mais forte.', alvo: { quem: 'inimigo' }, pode: p => p.campo.length > 0, efeito: (u, alvo) => { const x = maisForteMeu(AR.dono(u)); if (x) AR.dano(alvo, AR.atk(x), null); } });
 arHeroi({ niveis: ['a_jp_ronin', 'a_jp_ronin2', 'a_jp_ronin3'], assinatura: 'a_jp_corte', missao: 'duelo' });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_jp_samarco', 'a_jp_samespada', { nome: 'Lendas do Clã', icone: '⛩️', arte: 'a_fus_cla', kw: ['furia'], texto: 'Fusão especial: Fúria.' });
-arFusao('a_jp_yamabushi', 'a_jp_miko', { nome: 'Duo do Santuário', icone: '⛩️', arte: 'a_fus_duo', kw: ['regenera', 'barreira'], texto: 'Fusão especial: Regeneração e Barreira.' });

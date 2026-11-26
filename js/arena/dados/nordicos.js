@@ -18,6 +18,20 @@ AR_DECKS.no = {
     '🐙 <b>Kraken:</b> um só Tentáculo, que começa 1/1. <b>Agitar</b> dá +1/+1 a ele (até 12), mesmo fora de campo. O Pescador e o Redemoinho o trazem para o banco.',
     '🌊 <b>Maré:</b> a Saga sobe com 3, 7, 11, 15 e 20 Agitar; no último, o Kraken emerge.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Agite o Kraken: o Tentáculo cresce +1/+1 a cada Agitar, mesmo fora de campo. A maré sobe com 3, 7, 11, 15 e 20 Agitar, e no fim o Kraken emerge.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'O Pescador traz o Tentáculo. Drakkar e Sacerdotisa Agitam cedo.'],
+      ['Meio', 'Use o Poder da Ran (Agite 1) toda rodada que sobrar Influência. Skald e Berserker atacam junto com o Tentáculo grande.'],
+      ['Final', 'o Jarl e o Chamado das Profundezas Agitam 2 de uma vez. A Onda Gigante causa dano igual ao Ataque do Tentáculo: use para derrubar a ameaça maior.'],
+    ],
+    chave: ['a_no_pescador', 'a_no_sacerdotisa', 'a_no_drakkar', 'a_no_onda', 'a_no_jarl'],
+    cuidado: [
+      'Só existe um Tentáculo: se ele cair, o Pescador ou o Redemoinho o trazem de volta, já com o tamanho acumulado.',
+      'Agitar é o motor: carta que Agita quase sempre vale mais que carta que não Agita.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_no_ragnar', 'a_no_freydis'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -119,7 +133,7 @@ arUnidade({ id: 'a_no_ran', nome: 'Ran, Senhora das Marés', nacao: 'NO', custo:
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Ragnar ── */
@@ -139,6 +153,3 @@ arUnidade({ id: 'a_no_freydis3', nome: 'Freydís, Fúria de Vinland', nacao: 'NO
 assinar({ id: 'a_no_brado', nome: 'Brado de Vinland', nacao: 'NO', custo: 3, velocidade: 'rapida', icone: '📣', arte: 'a_no_brado', texto: 'Seus aliados ganham +2/+0 nesta rodada.', efeito: u => { for (const x of AR.aliados(AR.dono(u))) AR.buff(x, 2, 0, true); } });
 arHeroi({ niveis: ['a_no_freydis', 'a_no_freydis2', 'a_no_freydis3'], assinatura: 'a_no_brado', missao: 'sobreviver' });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_no_berserker', 'a_no_valquiria', { nome: 'Fúria de Valhalla', icone: '🪽', arte: 'a_no_valquiria', kw: ['esmagar'], texto: 'Fusão especial: Esmagar.' });
-arFusao('a_no_freydis', 'a_no_ragnar', { nome: 'Reis do Mar', icone: '👑', arte: 'a_no_ragnar2', kw: ['esmagar', 'regenera'], texto: 'Fusão especial: Esmagar e Regeneração.' });

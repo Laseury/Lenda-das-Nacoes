@@ -46,6 +46,20 @@ AR_DECKS.pg = {
     '🌩 <b>Precipitar</b> (1 por rodada): veja 3 Eventos e escolha qual entra; repetido na rodada, vira Eco. <b>Eco:</b> 🔥 aliados +1/+0 · 🌿 cure 2 da Capital e 1 de cada aliado · 🌑 1 de dano ao inimigo mais fraco. <b>Fixar:</b> a próxima troca natural de Evento não acontece.',
     '⏳ <b>Eras:</b> cada rodada que termina sob um Evento é uma Era daquele Clima. A Saga pede Eras dos três Climas; no Clímax, todas as bênçãos valem juntas.',
   ],
+  /* Estratégia para quem pega o deck pela primeira vez (botão 🧭 Estratégia na partida). chave = cartas-chave mostradas com a arte. */
+  estrategia: {
+    plano: 'Todo Evento Mundial é bênção para você. Escolha o Evento certo (Precipitar), use o Eco do Clima e viva Eras dos três Climas para chegar ao Clímax.',
+    passos: [
+      ['Começo (rodadas 1 a 3)', 'Trilobita e Nômade seguram o começo. Na rodada 3 sai o primeiro Evento: tenha o Xamã ou o Tremor para escolher qual.'],
+      ['Meio', 'Alterne os Climas: 🔥 Guerra para atacar, 🌿 Vida para curar, 🌑 Ruína para ferir. O Poder da Gaia dá Eco toda rodada.'],
+      ['Final', 'Estações e Fênix são os Heróis (vivem Eras). O Leviatã de Pantalassa Precipita e dá Eco; o Meteoro limpa o campo.'],
+    ],
+    chave: ['a_pg_xama', 'a_pg_tremor', 'a_pg_guardiao', 'a_pg_fenix', 'a_pg_leviata'],
+    cuidado: [
+      'Repetir o mesmo Clima não avança a Saga: você precisa de Eras dos três.',
+      'Precipitar é 1 vez por rodada; a segunda vira Eco.',
+    ],
+  },
   /* Heróis do deck (no máximo 2): o id do nível 1 de cada um, definidos mais abaixo neste arquivo */
   herois: ['a_pg_estacoes', 'a_pg_fenix'],
   /* As 40 cartas: ['id da carta', cópias]. A soma das cópias tem que dar 40. */
@@ -80,7 +94,7 @@ AR_DECKS.pg = {
 /* ═════════════════════ Líder ═════════════════════ */
 AR_LIDERES.pg = {
   id: 'pg', nome: 'Gaia, a Mãe-Terra', nacao: 'PG', icone: '🌍', carta: 'a_pg_gaia',
-  poder: { nome: 'Sopro de Gaia', custo: 2, texto: 'Eco: 🔥 aliados +1/+0 · 🌿 cure 2 da Capital · 🌑 1 de dano ao inimigo mais fraco.', efeito: p => arEco(p) },
+  poder: { nome: 'Sopro de Gaia', custo: 1, texto: 'Eco: 🔥 aliados +1/+0 · 🌿 cure 2 da Capital · 🌑 1 de dano ao inimigo mais fraco.', efeito: p => arEco(p) },
   poder2: { nome: 'Vontade de Gaia', custo: 2, texto: 'Receba o Eco e Fixe o Evento atual: a próxima revelação natural não o troca.', efeito: p => { arEco(p); AR.fixar(p); } },
   ascensao: { texto: 'Complete 3 Capítulos da Saga.', evento: 'saga', alvo: 3 },
 };
@@ -169,7 +183,7 @@ arUnidade({ id: 'a_pg_gaia', nome: 'Gaia, a Mãe-Terra', nacao: 'PG', custo: 5, 
 
 /* ═════════════════════ Heróis ═════════════════════ */
 /* Cada Herói: as 3 formas (nível 1, 2 e 3), a Assinatura (carta que vai para a mão no nível 3) e a missão que dá XP.
- * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano' (veja arMissao em base.js).
+ * Missões: 'derrubar', 'sobreviver', 'duelo', 'capital', 'bando', 'descobrir', 'eras', 'congelar', 'ataque', 'ano', 'recompensa' (veja arMissao em base.js).
  * facil: true para missões que acontecem quase toda rodada (pedem mais XP). */
 
 /* ── Senhora das Estações ── */
@@ -190,7 +204,3 @@ arUnidade({ id: 'a_pg_fenix3', nome: 'Fênix do Primeiro Sol', nacao: 'PG', cust
 assinar({ id: 'a_pg_chama', nome: 'Chama Eterna', nacao: 'PG', custo: 4, velocidade: 'lenta', icone: '🔥', arte: 'a_pg_chama', texto: 'Cause 2 de dano a todos os inimigos e cure 2 da sua Capital.', efeito: u => { const p = AR.dono(u); for (const x of AR.inimigos(p)) AR.dano(x, 2, null); AR.curarCapital(p, 2); } });
 arHeroi({ niveis: ['a_pg_fenix', 'a_pg_fenix2', 'a_pg_fenix3'], assinatura: 'a_pg_chama', missao: 'eras', facil: true });
 
-/* ═════════════════════ Fusões especiais (pares que nascem com nome e bônus) ═════════════════════ */
-arFusao('a_pg_nomade', 'a_pg_xama', { nome: 'Oráculo das Eras', icone: '🌠', arte: 'a_fus_oraculo', kw: ['vigia', 'barreira'], texto: 'Fusão especial: ao nascer, Precipita. Vigia e Barreira.', aoFundir: (u, p) => AR.precipitar(p) });
-arFusao('a_pg_listro', 'a_pg_dimetro', { nome: 'Titã Permiano', icone: '🦖', arte: 'a_fus_tita', kw: ['esmagar'], texto: 'Fusão especial: Esmagar, Fúria e Regeneração.' });
-arFusao('a_pg_mamute', 'a_pg_trilobita', { nome: 'Fera Primordial', icone: '🐾', arte: 'a_pg_mamute', kw: ['robusto'], texto: 'Fusão especial: Robusto.' });

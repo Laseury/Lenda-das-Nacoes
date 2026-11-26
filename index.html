@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Lendas das Nações</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -322,7 +324,6 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
         <section data-aba="mundo" data-titulo="🌍 Mundo"><ul>
           <li><b>🌍 Eventos Mundiais:</b> na rodada 3 e a cada 3 rodadas, um Evento é revelado e muda as regras para os dois até o próximo (Lua de Sangue, Peste, Tempestade no Atlântico, Era de Ouro, Paz Armada…).</li>
           <li><b>🏪 Mercado Mundial:</b> a cada rodada, 3 cartas neutras à venda. Para comprar, você precisa estar com <b>2 cartas ou menos na mão</b>; custa 1 de Influência e é 1 compra por rodada. A carta vai para a mão e depois é jogada pelo custo normal.</li>
-          <li><b>⚗️ Fusão:</b> pague 4 de Influência e una dois aliados: Ataque e Vida somam (até 9) e as palavras-chave se juntam. Pares especiais, como Dom Quixote e Sancho, nascem com bônus. 1 por rodada.</li>
           <li><b>🔥 Oferenda:</b> 1 vez por rodada, na sua vez, descarte 1 carta da mão e recupere Influência igual ao custo dela, sem passar do teto da rodada.</li>
           <li><b>☠️ A Peste:</b> nasce do Evento Peste; fere quem você invoca e encarece suas Táticas até você gastar 5 de Influência.</li>
         </ul></section>
@@ -340,7 +341,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
           <li><b>Defender:</b> quando o rival ataca, toque nas suas unidades para pô-las na frente dos atacantes. Depois, OK.</li>
           <li><b>⭐ Heróis:</b> os retratos ao lado do Líder mostram o nível e a missão; passe o mouse para ver as três formas.</li>
           <li><b>☯ Bênção (China):</b> toque no símbolo ☯ do Animal do ano para usar a Bênção. A roda à esquerda mostra o ano.</li>
-          <li><b>🔥 Oferenda e ⚗️ Fusão:</b> os botões aparecem na dica, na sua vez, quando dá para usar.</li>
+          <li><b>🔥 Oferenda:</b> o botão aparece na dica, na sua vez, quando dá para usar.</li>
           <li><b>📜 Diário:</b> botão no topo. Mostra cada jogada com a arte e o que ela causou; passe o mouse para ver a carta.</li>
           <li><b>🎬 Replay:</b> no fim da partida, reveja o duelo passo a passo.</li>
         </ul></section>
@@ -370,6 +371,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
           <div class="ar-menu-jogo">
             <span class="ar-rodada-info" id="ar-rodada-info"></span>
             <button class="ar-icone-btn ar-btn-mercado" data-ar="mercado" title="Mercado Mundial: cartas neutras à venda">🏪</button>
+            <button class="ar-icone-btn ar-btn-estrategia" data-ar="estrategia" title="Estratégia do seu deck: como jogar com ele">🧭</button>
             <button class="ar-icone-btn" data-ar="diario" title="Diário do duelo">📜</button>
             <button class="ar-icone-btn" data-ar="ajuda" title="Como jogar">?</button>
             <button class="ar-icone-btn" data-ar="sair" title="Sair do duelo">✕</button>
@@ -383,6 +385,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
           <div class="ar-capital eu" id="ar-capital-0"></div>
         </div>
         <div class="ar-gramado">
+          <div class="ar-turno-luz" aria-hidden="true"></div>
           <div class="ar-palco cima" id="ar-palco-1" aria-hidden="true"></div>
           <div class="ar-palco baixo" id="ar-palco-0" aria-hidden="true"></div>
           <div class="ar-ceu" id="ar-ceu" aria-hidden="true"></div>
@@ -489,6 +492,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
 <script src="js/arena/dados/irlanda.js"></script>
 <script src="js/arena/dados/china.js"></script>
 <script src="js/arena/dados/russia.js"></script>
+<script src="js/arena/dados/oeste.js"></script>
 <script src="js/arena/dados/conferir.js"></script>
 <script src="js/arena/motor.js"></script>
 <script src="js/arena/ia.js"></script>
