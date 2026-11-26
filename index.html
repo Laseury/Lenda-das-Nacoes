@@ -1,0 +1,497 @@
+<title>Lendas das Nações</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/estilo.css">
+<link rel="stylesheet" href="css/arena.css">
+<!-- Faixa de erro: se algum arquivo editado tiver um erro, ele aparece aqui em cima, com o arquivo e a linha. -->
+<style>#erro-edicao{position:fixed;z-index:99999;left:8px;right:8px;top:8px;padding:10px 40px 10px 14px;border-radius:10px;background:#5b0d12;color:#ffe9e9;font:14px/1.4 system-ui,sans-serif;white-space:pre-wrap;box-shadow:0 6px 24px #0008;max-height:45vh;overflow:auto}#erro-edicao b{color:#fff}#erro-edicao button{position:absolute;right:8px;top:6px;background:none;border:0;color:#fff;font-size:20px;cursor:pointer}</style>
+<script>
+function avisarErro(txt) {
+  const mostra = () => {
+    let el = document.getElementById('erro-edicao');
+    if (!el) { el = document.createElement('div'); el.id = 'erro-edicao'; el.setAttribute('role', 'alert'); el.innerHTML = '<button aria-label="Fechar">×</button><b>Erro de edição</b><div></div>'; el.querySelector('button').onclick = () => el.remove(); document.body.appendChild(el); }
+    el.lastChild.textContent += (el.lastChild.textContent ? '\n' : '') + txt;
+  };
+  if (document.body) mostra(); else document.addEventListener('DOMContentLoaded', mostra);
+}
+/* só enquanto o jogo carrega: erros de digitação nos arquivos editados */
+window.addEventListener('load', () => { window.jogoCarregou = true; });
+window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) avisarErro(`${e.filename.split('/').slice(-2).join('/')}, linha ${e.lineno}: ${e.message}`); });
+</script>
+
+<main id="app">
+
+  <!-- Menu principal: a Arena é o modo principal -->
+  <section id="tela-menu" class="tela">
+    <div class="mn-fundo" id="mn-fundo" aria-hidden="true"></div>
+    <div class="mn-brasas" id="mn-brasas" aria-hidden="true"></div>
+    <div class="mn-topo">
+      <button class="ar-icone-btn" data-ar="regras" title="Como jogar">?</button>
+      <button class="ar-icone-btn btn-som" data-som="1" title="Ligar ou desligar o som">🔊</button>
+    </div>
+    <div class="mn-centro">
+      <p class="sobretitulo">Duelo de cartas</p>
+      <h1 class="titulo">Lendas das Nações</h1>
+      <p class="mn-lema">Escolha uma nação, escreva a Saga dela e tome a Capital do rival.</p>
+      <button class="mn-jogar" data-ar-abrir="1"><span>⚔</span> Jogar</button>
+      <button class="mn-classico" data-ir="classico">Modo Clássico</button>
+    </div>
+    <div class="mn-lideres" id="mn-lideres"></div>
+  </section>
+
+  <!-- Modo Clássico: tudo do jogo antigo fica aqui -->
+  <section id="tela-classico" class="tela" hidden>
+    <header class="topo-tela">
+      <button class="btn" data-ir="menu">← Menu</button>
+      <h2>Modo Clássico</h2>
+    </header>
+    <div class="cl-corpo">
+      <p class="cl-sub" id="sobre-classico"></p>
+      <div class="cl-grade">
+        <button class="cl-tile principal" data-ir="escolha"><span class="cl-ico">⚔</span><strong>Novo duelo</strong><small>1x1, 2x2 ou online</small></button>
+        <button class="cl-tile principal" data-ir="campanha"><span class="cl-ico">🌍</span><strong>Volta ao Mundo</strong><small>a campanha</small></button>
+        <button class="cl-tile" data-ir="colecao"><span class="cl-ico">🎴</span><strong>Coleção</strong></button>
+        <button class="cl-tile" data-editar="novo"><span class="cl-ico">🛠</span><strong>Editor de decks</strong></button>
+        <button class="cl-tile" data-ir="recordes"><span class="cl-ico">🏅</span><strong>Recordes</strong></button>
+        <button class="cl-tile" data-ir="regras"><span class="cl-ico">📖</span><strong>Regras</strong></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Escolha de decks -->
+  <section id="tela-escolha" class="tela" hidden>
+    <header class="topo-tela">
+      <button class="btn" data-ir="classico">Voltar</button>
+      <h2 id="titulo-escolha">Monte o duelo</h2>
+      <div class="linha-modos" id="escolha-modo" role="radiogroup" aria-label="Modo de jogo"></div>
+    </header>
+    <div class="escolha-layout">
+      <div class="escolha-principal">
+        <section class="painel-escolha" id="bloco-online" hidden aria-labelledby="titulo-sala">
+          <h3 class="rotulo-secao" id="titulo-sala">Sala online</h3>
+          <div id="online-conteudo"></div>
+        </section>
+        <section class="painel-escolha" aria-labelledby="titulo-seu-deck">
+          <div class="painel-cabeca">
+            <h3 class="rotulo-secao" id="titulo-seu-deck">Seu deck</h3>
+            <div class="abas abas-escolha" id="abas-escolha" role="tablist" aria-label="Tipo de deck"></div>
+          </div>
+          <div id="escolha-minha"></div>
+        </section>
+      </div>
+      <aside class="escolha-lateral" aria-label="Resumo do duelo">
+        <div class="cartao-duelo">
+          <div id="resumo-escolha"></div>
+          <div class="cfg" id="cfg-artefato"></div>
+          <div class="cfg" id="bloco-aliado" hidden></div>
+          <div class="cfg" id="bloco-rival"></div>
+          <div class="cfg" id="bloco-dificuldade"></div>
+          <button class="btn primario grande" id="btn-comecar">Começar duelo</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Editor de decks -->
+  <section id="tela-editor" class="tela" hidden>
+    <header class="topo-tela">
+      <button class="btn" data-ir="escolha">Voltar</button>
+      <h2>Editor de decks</h2>
+    </header>
+    <div id="editor-conteudo"></div>
+  </section>
+
+  <!-- Coleção -->
+  <!-- Campanha -->
+  <section id="tela-campanha" class="tela" hidden>
+    <header class="topo-tela">
+      <button class="btn" data-ir="classico">Voltar</button>
+      <h2>Volta ao Mundo</h2>
+    </header>
+    <div id="campanha-conteudo"></div>
+  </section>
+
+  <!-- Recordes -->
+  <section id="tela-recordes" class="tela" hidden>
+    <header class="topo-tela">
+      <button class="btn" data-ir="classico">Voltar</button>
+      <h2>Recordes</h2>
+    </header>
+    <div id="recordes-conteudo"></div>
+  </section>
+
+  <section id="tela-colecao" class="tela" hidden>
+    <header class="topo-tela">
+      <button class="btn" data-ir="classico">Voltar</button>
+      <h2>Coleção</h2>
+    </header>
+    <div class="mapa-mundi" id="mapa-colecao" aria-label="Mapa dos países: toque num país para ver o deck"></div>
+    <div class="abas" id="abas-colecao" role="tablist"></div>
+    <div id="lista-colecao"></div>
+  </section>
+
+  <!-- Regras -->
+  <section id="tela-regras" class="tela" hidden>
+    <header class="topo-tela">
+      <button class="btn" data-ir="classico">Voltar</button>
+      <h2>Como se joga</h2>
+    </header>
+    <div class="regras">
+      <section>
+        <h3>Objetivo</h3>
+        <p>Cada duelista começa com <b>8000 PV</b> (Pontos de Vida), um deck de 30 cartas e 5 cartas na mão. Vence quem zerar os PV do rival. Quem precisar comprar uma carta com o deck vazio perde.</p>
+      </section>
+      <section>
+        <h3>Os três tipos de carta</h3>
+        <dl class="tipos">
+          <div class="t-humano"><dt>Personagens</dt><dd>Pessoas, animais, deuses e criaturas das lendas, com <b>Nível</b>, <b>ATK</b> (ataque) e <b>DEF</b> (defesa). Ficam numa das 5 zonas de Personagens, em posição de ataque (em pé) ou de defesa (deitados).</dd></div>
+          <div class="t-magia"><dt>Magias</dt><dd>Ativadas no seu turno. <b>Normais</b> fazem efeito e vão ao cemitério; <b>Contínuas</b> ficam no campo; <b>Equipamentos</b> se prendem a um Personagem seu e o fortalecem; a <b>Magia de Campo</b> ocupa uma zona só dela, à esquerda dos Personagens. Cada duelista tem uma Magia de Campo por vez: ativar outra manda a anterior ao cemitério.</dd></div>
+          <div class="t-armadilha"><dt>Armadilhas</dt><dd>Precisam ser baixadas viradas e só podem ser ativadas a partir do turno seguinte, quando o gatilho acontece: o rival ataca, invoca ou ativa uma Magia. As armadilhas <b>livres</b> também podem ser ativadas no seu turno. <b>Contra-armadilhas</b> respondem a outra Armadilha ou efeito.</dd></div>
+        </dl>
+      </section>
+      <section>
+        <h3>O turno</h3>
+        <ol class="passos">
+          <li><b>Compra.</b> Compre 1 carta (quem começa o duelo não compra no 1º turno).</li>
+          <li><b>Principal 1.</b> Invoque, ative Magias, baixe cartas, mude posições e use efeitos.</li>
+          <li><b>Batalha.</b> Seus Personagens em ataque podem atacar, uma vez cada. Ninguém ataca no 1º turno do duelo.</li>
+          <li><b>Principal 2.</b> Mais uma chance de jogar cartas depois da batalha.</li>
+          <li><b>Final.</b> Descarte até ficar com 7 cartas na mão. Bônus “até o fim do turno” acabam.</li>
+        </ol>
+      </section>
+      <section>
+        <h3>Invocar Personagens</h3>
+        <p>Você tem <b>1 Invocação Normal por turno</b>: em ataque com a face para cima, ou baixada em defesa virada para baixo. Personagens de <b>Nível 5 e 6</b> exigem 1 tributo (mandar um Personagem seu ao cemitério) e os de <b>Nível 7 ou mais</b> exigem 2. Invocações especiais feitas por efeitos não gastam a Invocação Normal.</p>
+        <p>Um Personagem pode mudar de posição uma vez por turno, mas não no turno em que entrou nem depois de atacar. Um Personagem baixado é revelado em ataque, o que ativa os efeitos “quando invocado”.</p>
+      </section>
+      <section>
+        <h3>Deck Extra</h3>
+        <p>Além do deck principal (40 cartas ou mais), cada duelista tem um <b>Deck Extra</b> de até 15 cartas, que nunca é comprado. Dele saem três tipos de Personagens, sempre por invocação especial, sem gastar a Invocação Normal:</p>
+        <ul class="passos">
+          <li><b>Fusão</b> (moldura roxa): feita com a <b>Polimerização própria do deck</b> (3 cópias em cada deck com Fusão, como o Mutirão no Brasil ou a Harmonia do Yin-Yang na China). Ela manda ao cemitério os materiais listados na carta de Fusão e ainda dá um bônus do deck. Cada deck tem uma Fusão <b>genérica</b> (2 Personagens do país) e uma Fusão <b>do chefe</b>, que exige o Personagem mais poderoso do deck e é a mais forte.</li>
+          <li><b>XYZ</b> (moldura escura): sobreponha Personagens com a face para cima de mesmo Nível. Eles viram <b>matérias</b> presas ao XYZ, que tem <b>Classe</b> em vez de Nível. Muitos efeitos pedem para remover matérias.</li>
+          <li><b>Evolução</b> (moldura laranja, Japão): uma escada de 5 degraus, Camponês → Samurai Aspirante → Samurai → Xogum → Imperador. Um Personagem seu com a face para cima sobe para o degrau seguinte, vindo do Deck Extra. Ele e as formas anteriores ficam embaixo da nova como <b>linhagem</b>, e cada carta da linhagem dá 200 de ATK. Quem entrou no campo neste turno só evolui com Treino no Dojo ou Despertar do Espírito, e cada Personagem evolui uma vez por turno.</li>
+          <li><b>Ritual</b> (moldura azul): uma vez por turno, se o oponente controla <b>pelo menos tantos Personagens quanto você</b>, ofereça Personagens da sua mão e/ou do seu campo cuja soma de Níveis alcance o Nível do Ritual. As oferendas vão para o cemitério. Fichas e XYZ não servem de oferenda.</li>
+        </ul>
+        <p>Abra o Deck Extra tocando na pilha roxa à esquerda da sua zona de Magias e Armadilhas. Se um Personagem do Deck Extra voltaria para a mão, ele volta para o Deck Extra.</p>
+      </section>
+      <section>
+        <h3>Palavras-chave</h3>
+        <ul class="passos">
+          <li><b>Subjugar</b> (Brasil): os Personagens do oponente subjugados por uma carta não podem declarar ataques.</li>
+          <li><b>Perfura</b> (Brasil): ao atacar um Personagem em defesa, causa a diferença entre o ATK e a DEF como dano.</li>
+          <li><b>No cemitério</b> (Portugal): efeito usado a partir do cemitério, no seu turno. Abra o cemitério para ativá-lo. <b>Naufrágio N</b>: olhe N cartas do topo, fique com 1 e mande as outras ao cemitério.</li>
+          <li><b>Banir</b> (Alemanha): a carta vai para o Exílio do dono e não volta, salvo por efeitos como Walhalla.</li>
+          <li><b>Ficha</b> (Argentina): Personagem criado por efeito, sem carta no deck. Não pode atacar no turno em que é criada, some quando sai do campo e não pode ser matéria XYZ.</li>
+          <li><b>Conquista</b> (Roma): você toma o controle de um Personagem do oponente <b>até o fim do turno</b>, e ele conta como Romano: ataque com ele ou use-o como tributo ou material. Quando um conquistado seu batalha, você sofre só <b>metade</b> do dano de batalha. No fim do turno ele volta ao dono. Se for destruído, banido ou devolvido à mão, vai para o cemitério, o exílio ou a mão do <b>dono original</b>. Só as Fusões, a Legião (XYZ) e o Imperador Augusto (Ritual) seguram um conquistado por mais tempo, enquanto a condição escrita neles for cumprida.</li>
+          <li><b>Maldição</b> (Egito): marcador num Personagem. Cada uma tira 200 de ATK, e no início do turno do jogador que controla Personagens amaldiçoados ele sofre 100 de dano por Maldição. O número aparece num selo roxo na carta.</li>
+          <li><b>Palos</b> (Espanha): ative os 5 Palos diferentes ao longo do duelo (o contador fica na sua barra) e, com os 5 no cemitério e um Personagem Espanhol de Nível 10 (La Estrella del Tablao) no campo, a Magia <b>El Duende</b> vence o duelo na hora.</li>
+          <li><b>Zodíaco</b> (China): só desperta com a Magia de Campo <b>Templo do Céu</b> (ou com o Imperador de Jade). Ao ativá-la, você escolhe o ano entre os 12 signos (uma vez por turno, pagando 1000 PV, escolhe de novo). Com ela no campo, uma vez por turno, você invoca especialmente da mão 1 Personagem Chinês do signo do ano, de qualquer Nível (<b>Nascido no ano</b>). Cada ano dá um bônus a <b>todos os duelistas</b>, mostrado na barra de fases: Rato (Nível 3 ou menor +500 ATK), Boi (defesa +600 DEF), Tigre (ataque +300 ATK), Coelho (+500 PV no início do turno), Dragão (Nível 7 ou maior +500 ATK), Serpente (Nível 5 e 6 +500 ATK), Cavalo (Nível 4 +300 ATK), Cabra (+400 DEF), Macaco (Deck Extra +400 ATK), Galo (com 2 cartas ou menos na mão, compra 1 no início do turno), Cão (dano de batalha −300) e Porco (+300 PV quando um Personagem seu é destruído). Os Personagens do signo do ano ganham 500 de ATK e de DEF. Cada Personagem Chinês tem um efeito quando é invocado e uma <b>Bênção</b>: um efeito ativo que você usa no seu Main Phase (toque na carta) enquanto o ano é o do signo dele, uma vez por turno e uma vez por ano. Quando o ano muda, a Bênção fica pronta de novo, mesmo para quem foi invocado antes; o símbolo ☯ na carta mostra que ela está pronta. A Roda do Zodíaco e Sun Wukong escolhem o ano em vez de rolar o dado.</li>
+          <li><b>Sol</b> (México): cada Personagem Mexicano seu que vai para o cemitério dá 1 de Sol (contador na sua barra). O Sol paga efeitos. Cada inimigo que um Mexicano seu destrói em batalha também dá 1 de Sol. Com 17 de Sol, a habilidade O Quinto Sol vence o duelo.</li>
+          <li><b>Visita</b> (México): o Personagem é invocado do cemitério só até o fim do turno; depois volta para o cemitério (sem dar Sol de novo).</li>
+          <li><b>Duelo</b> e <b>Rapidez ⚡</b> (Velho Oeste): os dois Personagens rolam 1 dado (1 a 6) e somam a Rapidez. Quem tirar mais destrói o outro, sem batalha e sem dano. Empate: ninguém cai, salvo cartas que vencem empates. Personagens sem Rapidez escrita têm Rapidez natural de 1 a cada 3 Níveis (um Nível 8 tem 2).</li>
+          <li><b>Moeda</b> e <b>Trevos</b> (Irlanda): cara faz o efeito forte da carta; coroa faz pouco ou nada. Quando der coroa, 1 Trevo (contador na barra) é gasto para jogar a moeda de novo.</li>
+          <li><b>Invenção</b> (Itália): Magias de Equipamento que Leonardo, a Academia e outros equipam direto do deck. Muitos Italianos ficam mais fortes ou resistentes quando estão equipados.</li>
+          <li><b>Missão</b> (Inglaterra): Magia Contínua com progresso (mostrado na carta, como 1/3). Avança quando o feito escrito acontece: destruir em batalha, causar dano, invocar Cavaleiros ou ativar Magias. Completa, vai ao cemitério e dá a recompensa.</li>
+          <li><b>Matrioska</b> e <b>Congelar</b> (Rússia): uma Matrioska destruída invoca do deck um Personagem Russo de Nível menor. Um Personagem congelado (❄) não ataca nem muda de posição até o fim do próximo turno do dono.</li>
+          <li><b>Glória</b> (Grécia): marcadores (✦) que um Herói ganha ao entrar em campo, no início de cada turno seu, ao destruir um Personagem em batalha e por efeitos. A Glória libera poderes escritos no Herói e some se ele sair do campo.</li>
+          <li><b>Revolução</b> (França): você está em Revolução enquanto tem menos PV que o oponente, e muitas cartas Francesas ganham efeitos extras.</li>
+          <li><b>Ritmo</b> (Cuba): contador que cresce a cada carta Cubana tocada no seu turno. Se você terminar um turno sem tocar nenhuma, ele cai pela metade.</li>
+          <li><b>Tentáculos</b> e <b>Kraken</b> (Nórdicos): Tentáculos têm 0 de ATK, não causam nem sofrem dano de batalha, buscam Magias e Armadilhas Nórdicas e, com o Mar do Norte no campo, trazem outro do deck quando caem. Cada tipo tem ainda um gatilho próprio: ao ser enviado do deck ao cemitério, ao ser invocado ou ao ser banido. <b>Erguer o Tentáculo</b> traz um Tentáculo ou dá 1 Maré (+300 ATK, +200 DEF) ao seu mais avançado; com 3 Marés ele evolui no campo em Tentáculo Colossal, e com 5 em Tentáculo Primordial. A partir do 5º turno, com 8 no cemitério, bana-os e chame o Kraken de qualquer lugar.</li>
+          <li><b>Séries</b> (Aspirante, Samurai, Palo, Herói, Cavaleiro, Missão, Invenção, Matrioska, Mosqueteiro) aparecem na linha de tipo da carta e são usadas pelas sinergias.</li>
+          <li><b>[Personagem/Normal]</b> não tem efeito: o texto em itálico conta a história do personagem.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Destiny Draw</h3>
+        <p>Habilidade geral de todo deck, <b>uma vez por duelo</b>. No início do seu turno, antes de comprar, se os seus PV estão <b>abaixo de 4000</b>, o rival controla Personagens e você não tem resposta maior (nenhum Personagem com a face para cima, ou o seu mais forte tem menos ATK que o mais forte dele), o jogo oferece o Destiny Draw: escolha uma das <b>Cartas do Destino</b> do seu deck, ela vai para o topo e você a compra na hora. Cada deck tem as suas Cartas do Destino, que aparecem em "Ver deck completo". A barra mostra ✨ quando ele está pronto.</p>
+        <h3>Modos de jogo</h3>
+        <p><b>1x1 contra a CPU</b>: o duelo de sempre. <b>2x2 em dupla</b> (Duelo em Dupla): você e um aliado CPU contra 2 CPUs; cada dupla divide o campo, o cemitério, o exílio e 8000 PV, e os dois membros revezam os turnos (você, CPU 1, seu aliado, CPU 2...), cada um com o próprio deck, mão, Deck Extra e Habilidades. <b>1x1 online</b>: crie uma sala, mande o código a um amigo e duelem em tempo real; os dois precisam abrir o jogo pelo link do claude.ai, e o amigo precisa ter acesso ao Artifact (menu Compartilhar).</p>
+        <h3>Artefatos lendários</h3>
+        <p>Antes do duelo, cada duelista escolhe 1 Artefato lendário (Santo Graal, Excalibur, Espada Kusanagi, Arca Perdida, Mjölnir, Pedra Filosofal ou Tridente de Poseidon). Ele fica guardado fora do deck. A <b>Habilidade de duelo</b> passa a oferecer uma escolha: invocar a Lenda (pagando o custo) <b>ou</b> pegar o Artefato na mão, sem custo e sem travar as invocações. Depois de usado, o Artefato some.</p>
+      </section>
+      <section>
+        <h3>Uma vez por turno por nome</h3>
+        <p>As cartas que podem quebrar o jogo trazem um selo <b>1×</b> na ilustração (riscado depois de usado) e a regra escrita no texto: as Magias e Armadilhas que compram ou buscam cartas, as que destroem vários Personagens, as Polimerizações e os Personagens que buscam cartas no deck ao serem invocados. Elas só funcionam <b>uma vez por turno pelo nome</b>: se você ativou um Pote de Ouro, não ativa outro no mesmo turno. As outras cartas não têm esse limite, então combos como trazer o Alebrije de volta várias vezes continuam valendo.</p>
+      </section>
+      <section>
+        <h3>Cadeia de respostas</h3>
+        <p>Quando alguém ativa uma Armadilha ou um efeito de resposta, o outro duelista pode responder com uma <b>Contra-armadilha</b> (como a <b>Anulação</b>, que todo deck traz), e assim por diante. Cada resposta é um <b>elo</b> da cadeia. No fim, os elos resolvem do último para o primeiro: a carta negada não faz efeito e vai ao cemitério.</p>
+      </section>
+      <section>
+        <h3>Habilidades</h3>
+        <p>Cada deck tem <b>2 habilidades</b>. A de <b>uso único</b> (① uma vez por duelo) é um botão na sua barra: pague o custo numa Fase Principal e, se você escolheu um Artefato, decida entre a Lenda e o Artefato. A outra é <b>passiva</b> (✦): fica sempre ativa, sem custo e sem botão, e reforça a mecânica do deck (por exemplo, Saudade cura quando um Português cai do campo; Inverno Russo enfraquece quem está congelado). Durante o duelo, o botão <b>📖 Como joga</b> na barra de cada duelista explica a mecânica do deck e mostra as duas habilidades. Todo deck oferece:</p>
+        <ul class="passos">
+          <li><b>Lenda</b> (uma vez por duelo): invoca um Personagem exclusivo, que não está em deck nenhum e só entra no duelo pela Habilidade. Depois dela, você não pode invocar mais nenhum Personagem naquele turno. Ele aparece na Coleção, em Cartas de Habilidade.</li>
+          <li><b>Golpe único</b> (uma vez por duelo): por exemplo, uma Invocação por Fusão sem Polimerização, ou uma vitória própria como O Quinto Sol.</li>
+          <li><b>Passiva</b> (sempre ativa): um efeito pequeno ligado à mecânica do deck; os que disparam acontecem no máximo uma vez por turno.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Batalha</h3>
+        <ul class="passos">
+          <li><b>ATK contra ATK:</b> o de menor ATK é destruído e o dono dele perde a diferença em PV. Empate destrói os dois.</li>
+          <li><b>ATK contra DEF:</b> se o ATK for maior, o defensor é destruído sem dano. Se for menor, o atacante perde a diferença em PV.</li>
+          <li><b>Ataque direto:</b> sem Personagens no campo do rival, o dano é o ATK inteiro.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Volta ao Mundo</h3>
+        <p>No modo campanha, você escolhe um deck e enfrenta todos os outros países, do mais fácil ao mais difícil. A cada etapa a CPU começa com mais 500 PV. Cada vitória carimba o passaporte e dá uma carta de prêmio que entra no seu deck até o fim da viagem.</p>
+      </section>
+      <section>
+        <h3>Os decks</h3>
+        <p>Cada país tem um deck de 40 cartas ou mais, com um estilo de vitória que só ele tem.</p>
+        <dl class="nacoes-regras" id="regras-decks"></dl>
+      </section>
+    </div>
+  </section>
+
+  <!-- Duelo -->
+  <section id="tela-duelo" class="tela" hidden>
+    <div class="duelo">
+      <div class="mesa">
+        <div class="barra barra-cpu" id="barra-cpu"></div>
+        <div class="mao mao-cpu" id="mao-cpu" aria-label="Mão da CPU"></div>
+        <div class="campo campo-cpu">
+          <div class="fileira" id="mt-cpu" aria-label="Magias e Armadilhas da CPU"></div>
+          <div class="fileira" id="hu-cpu" aria-label="Personagens da CPU"></div>
+        </div>
+        <div class="fases" id="fases"></div>
+        <div class="campo campo-eu">
+          <div class="fileira" id="hu-eu" aria-label="Seus Personagens"></div>
+          <div class="fileira" id="mt-eu" aria-label="Suas Magias e Armadilhas"></div>
+        </div>
+        <div class="mao mao-eu" id="mao-eu" aria-label="Sua mão"></div>
+        <div class="barra barra-eu" id="barra-eu"></div>
+      </div>
+      <button class="btn-painel" id="btn-painel" aria-expanded="false" aria-controls="lateral-duelo">📜 Carta e diário</button>
+      <aside class="lateral" id="lateral-duelo">
+        <div class="lateral-topo">
+          <span class="lateral-marca">Lendas das Nações</span>
+          <button class="btn pequeno btn-som" data-som="1" title="Ligar ou desligar o som">🔊</button>
+          <button class="btn pequeno" id="btn-sair">Sair do duelo</button>
+        </div>
+        <div class="preview" id="preview"></div>
+        <h3 class="rotulo-secao">Diário do duelo</h3>
+        <ol class="log" id="log" aria-live="polite"></ol>
+      </aside>
+    </div>
+  </section>
+  <!-- Arena: o modo principal -->
+  <section id="tela-arena" class="tela" hidden>
+    <div id="ar-inicio" class="ar-inicio">
+      <header class="ar-topo">
+        <button class="btn" data-ir="menu">← Menu</button>
+        <h2 class="ar-titulo">Arena das Nações</h2>
+        <button class="btn" data-ar="regras">Como jogar</button>
+      </header>
+      <!-- Como Jogar: cada <section> vira uma aba (data-aba = id, data-titulo = botão). As regras de cada nação ficam no arquivo do deck (campo regras). -->
+      <div id="ar-regras" class="ar-regras" hidden>
+        <section data-aba="basico" data-titulo="📘 Básico"><ul>
+          <li><b>Objetivo:</b> cada um tem uma <b>Capital</b> com 20 de Vida. Zere a do rival (ou cumpra o Clímax da sua Saga, se ele der a vitória).</li>
+          <li><b>Influência 💎:</b> começa em 1 e sobe 1 por rodada, até 10. Cada carta custa Influência. O que sobrar vai para a <b>Reserva</b> (até 3), que só paga Táticas.</li>
+          <li><b>Rodada:</b> os dois compram 1. Vocês alternam ações: jogar 1 carta, usar o Poder do Líder, atacar ou passar. Dois "passar" seguidos encerram a rodada.</li>
+          <li><b>🚩 Estandarte:</b> só quem está com ele ataca naquela rodada, uma vez. Ele troca de lado a cada rodada.</li>
+          <li><b>Líder:</b> fica fora do deck. O Poder dele pode ser usado 1 vez por rodada, na sua vez, fora do combate. Cumpra a <b>Ascensão</b> e o Poder melhora e a carta do Líder vem para a sua mão.</li>
+          <li><b>🂠 Mão inicial:</b> antes de começar, você pode devolver a mão inteira ao deck e comprar 1 carta a menos. Dá para repetir até ficar com 3 cartas.</li>
+          <li><b>O dano nas unidades fica.</b> Só cura com Regeneração 🌿, evolução ou efeitos de cura: golpes e magias se acumulam rodada após rodada.</li>
+          <li><b>🔥 Troca:</b> com o banco cheio (6 unidades), você ainda pode jogar uma unidade: escolha um aliado para sacrificar. Ele cai de verdade (Último Suspiro e Saudade contam).</li>
+        </ul></section>
+        <section data-aba="combate" data-titulo="⚔ Combate"><ul>
+          <li><b>Atacar:</b> com o Estandarte, escolha os atacantes. Quem defende põe <b>1 bloqueador na frente de cada atacante</b>. Atacante sem bloqueio acerta a Capital.</li>
+          <li><b>Janela de Táticas:</b> depois dos bloqueios, os dois podem usar Táticas ⚡ Rápidas antes dos golpes.</li>
+          <li><b>Golpes:</b> o dano é <b>simultâneo</b>: atacante e bloqueador se acertam ao mesmo tempo, com o Ataque e a Vida <b>daquele momento</b> (contando Leis da Saga, Evento Mundial, Barreira, Robusto e bônus da rodada).</li>
+          <li><b>⚡ Golpe Rápido:</b> golpeia antes do inimigo, mas <b>só quando ataca</b>. <b>⏩ Acelerado:</b> golpeia antes no ataque e na defesa.</li>
+          <li><b>🛡 Barreira:</b> anula o próximo dano. <b>🪨 Robusto:</b> recebe 1 a menos de cada fonte. Por isso um golpe igual à Vida às vezes não derruba.</li>
+          <li><b>🎯 Desafio:</b> quem ataca escolhe qual inimigo é obrigado a bloquear. <b>👻 Elusivo:</b> só é bloqueado por Elusivos (ou Vigia).</li>
+          <li><b>😤 Fúria:</b> ao derrubar um inimigo em combate e sobreviver, ganha +1/+1. <b>🐘 Esmagar:</b> o dano que sobra acerta a Capital.</li>
+          <li><b>⚡ Pilha:</b> Táticas e Poderes não resolvem na hora. O rival vê o efeito (passe o mouse na Pilha) e pode responder com Táticas Rápidas, que entram por cima. <b>OK</b> resolve, de cima para baixo.</li>
+          <li><b>☠ Aviso de ataque fatal:</b> quando um combate pode zerar uma Capital, a dica fica vermelha (ou dourada, se for a do rival) e mostra quanto dano falta segurar.</li>
+        </ul></section>
+        <section data-aba="cartas" data-titulo="🃏 Cartas"><ul>
+          <li><b>Unidades:</b> ficam no banco (até 6). Ataque à esquerda, Vida à direita.</li>
+          <li><b>Táticas:</b> ⚡ <b>Rápidas</b> valem a qualquer hora, até no combate; 🐢 <b>Lentas</b> só na sua vez, fora do combate.</li>
+          <li><b>Zona de Relíquias (3 espaços):</b> 🔒 <b>Segredos</b> (virados, disparam sozinhos quando o gatilho acontece; o rival só vê "?") e 🏛️ <b>Contínuas</b> (efeito permanente enquanto estiverem lá).</li>
+          <li><b>⭐ Lendas:</b> figuras lendárias com efeitos fortes (no máximo 6 por deck).</li>
+          <li><b>Grito de Guerra:</b> efeito quando a unidade entra. <b>Último Suspiro:</b> efeito quando ela cai.</li>
+          <li><b>Ler uma carta:</b> passe o mouse por cima (no celular, toque). O zoom explica as palavras-chave e as mecânicas da nação.</li>
+        </ul><div id="ar-regras-kw"></div></section>
+        <section data-aba="mundo" data-titulo="🌍 Mundo"><ul>
+          <li><b>🌍 Eventos Mundiais:</b> na rodada 3 e a cada 3 rodadas, um Evento é revelado e muda as regras para os dois até o próximo (Lua de Sangue, Peste, Tempestade no Atlântico, Era de Ouro, Paz Armada…).</li>
+          <li><b>🏪 Mercado Mundial:</b> a cada rodada, 3 cartas neutras à venda. Para comprar, você precisa estar com <b>2 cartas ou menos na mão</b>; custa 1 de Influência e é 1 compra por rodada. A carta vai para a mão e depois é jogada pelo custo normal.</li>
+          <li><b>⚗️ Fusão:</b> pague 4 de Influência e una dois aliados: Ataque e Vida somam (até 9) e as palavras-chave se juntam. Pares especiais, como Dom Quixote e Sancho, nascem com bônus. 1 por rodada.</li>
+          <li><b>🔥 Oferenda:</b> 1 vez por rodada, na sua vez, descarte 1 carta da mão e recupere Influência igual ao custo dela, sem passar do teto da rodada.</li>
+          <li><b>☠️ A Peste:</b> nasce do Evento Peste; fere quem você invoca e encarece suas Táticas até você gastar 5 de Influência.</li>
+        </ul></section>
+        <section data-aba="saga" data-titulo="📜 Saga e Heróis"><ul>
+          <li><b>Saga da Nação:</b> cada deck tem 5 Marcos próprios (veja a aba da nação). Cada Marco fecha um Capítulo, que deixa uma <b>Lei</b>: regra que vale até o fim.</li>
+          <li><b>Ascensão:</b> no 3º Capítulo o Líder ascende. <b>Clímax:</b> no 5º, o grande final da nação (em algumas, a vitória na hora).</li>
+          <li><b>💨 Fôlego:</b> a primeira vez que sua Capital cai a 5 ou menos, o próximo Marco conta em dobro.</li>
+          <li><b>⭐ Heróis:</b> até 2 por deck, com 3 níveis. Em campo, o Herói ganha <b>XP</b>: 1 por rodada que começa lá e mais quando cumpre a missão dele (derrubar, sobreviver, atacar, congelar…). Ao subir de nível, ele vira a forma seguinte.</li>
+          <li><b>Herói que cai</b> volta ao deck sem perder nível nem XP. No nível 3, a carta <b>Assinatura</b> dele vai para a mão.</li>
+          <li><b>Heróis no deck:</b> eles ficam embaralhados no deck como qualquer carta e chegam à mão quando você os compra.</li>
+        </ul></section>
+        <section data-aba="tela" data-titulo="🖐 Na mesa"><ul>
+          <li><b>Tabuleiro:</b> à esquerda as Capitais (🔴 rival, 🔵 você) e o Estandarte 🚩; à direita a sua Influência (💎) e o botão <b>OK</b>, que faz a ação do momento.</li>
+          <li><b>Atacar:</b> com o Estandarte, toque nas suas unidades: elas vão para a zona de combate. Depois, OK.</li>
+          <li><b>Defender:</b> quando o rival ataca, toque nas suas unidades para pô-las na frente dos atacantes. Depois, OK.</li>
+          <li><b>⭐ Heróis:</b> os retratos ao lado do Líder mostram o nível e a missão; passe o mouse para ver as três formas.</li>
+          <li><b>☯ Bênção (China):</b> toque no símbolo ☯ do Animal do ano para usar a Bênção. A roda à esquerda mostra o ano.</li>
+          <li><b>🔥 Oferenda e ⚗️ Fusão:</b> os botões aparecem na dica, na sua vez, quando dá para usar.</li>
+          <li><b>📜 Diário:</b> botão no topo. Mostra cada jogada com a arte e o que ela causou; passe o mouse para ver a carta.</li>
+          <li><b>🎬 Replay:</b> no fim da partida, reveja o duelo passo a passo.</li>
+        </ul></section>
+        <section data-aba="modos" data-titulo="🌐 Modos"><ul>
+          <li><b>🎮 Jogar:</b> você contra a CPU (Normal, Difícil ou Mestre). O oponente pode ser escolhido ou ficar em segredo até a abertura.</li>
+          <li><b>🌐 Online:</b> um cria a sala e manda o código; o outro entra com ele. Cada um escolhe o seu deck em segredo e o anfitrião começa. Funciona de qualquer navegador: os dois se ligam direto (se a rede bloquear, use o Convite direto, copiando e colando). Os dois precisam estar com a mesma versão do jogo.</li>
+          <li><b>👁 Assistir:</b> um duelo entre duas CPUs, com pausa e velocidade 1x, 2x e 4x.</li>
+        </ul></section>
+      </div>
+      <div class="ar-mapa-caixa" id="ar-mapa-caixa">
+        <div class="ar-mapa-aviso" id="ar-mapa-aviso"></div>
+        <div class="ar-mapa" id="ar-mapa"></div>
+      </div>
+      <aside id="ar-decks" class="ar-painel" aria-live="polite"></aside>
+      <div class="ar-barra">
+        <div class="ar-lados" id="ar-lados"></div>
+        <div class="ar-escolhas" id="ar-opcoes"></div>
+        <button class="ar-comecar-btn" id="ar-jogo-btn" data-ar="comecar">Começar duelo</button>
+      </div>
+    </div>
+    <div id="ar-jogo" class="ar-jogo" hidden>
+      <!-- Tabuleiro: Capitais e Estandarte à esquerda, mana e botão OK à direita, bancos e combate no gramado. -->
+      <div class="ar-tab" id="ar-tab">
+        <div class="ar-topo-jogo">
+          <div class="ar-lider-zona cpu" id="ar-lider-cpu"></div>
+          <div class="ar-mao-cpu" id="ar-mao-cpu" aria-label="Mão da CPU"></div>
+          <div class="ar-menu-jogo">
+            <span class="ar-rodada-info" id="ar-rodada-info"></span>
+            <button class="ar-icone-btn ar-btn-mercado" data-ar="mercado" title="Mercado Mundial: cartas neutras à venda">🏪</button>
+            <button class="ar-icone-btn" data-ar="diario" title="Diário do duelo">📜</button>
+            <button class="ar-icone-btn" data-ar="ajuda" title="Como jogar">?</button>
+            <button class="ar-icone-btn" data-ar="sair" title="Sair do duelo">✕</button>
+          </div>
+        </div>
+        <div class="ar-esq">
+          <div class="ar-capital cpu" id="ar-capital-1"></div>
+          <div class="ar-saga cpu" id="ar-saga-1"></div>
+          <div class="ar-est" id="ar-est"></div>
+          <div class="ar-saga eu" id="ar-saga-0"></div>
+          <div class="ar-capital eu" id="ar-capital-0"></div>
+        </div>
+        <div class="ar-gramado">
+          <div class="ar-palco cima" id="ar-palco-1" aria-hidden="true"></div>
+          <div class="ar-palco baixo" id="ar-palco-0" aria-hidden="true"></div>
+          <div class="ar-ceu" id="ar-ceu" aria-hidden="true"></div>
+          <div class="ar-roda-z" id="ar-roda" hidden></div>
+          <div class="ar-reliq cpu" id="ar-reliq-1" aria-label="Relíquias da CPU"></div>
+          <div class="ar-fila cpu" id="ar-fila-cpu" aria-label="Banco da CPU"></div>
+          <div class="ar-luta" id="ar-luta"></div>
+          <div class="ar-fila eu" id="ar-fila-eu" aria-label="Seu banco"></div>
+          <div class="ar-reliq eu" id="ar-reliq-0" aria-label="Suas Relíquias"></div>
+        </div>
+        <div class="ar-dir">
+          <div class="ar-mana cpu" id="ar-mana-1"></div>
+          <div class="ar-ok-zona" id="ar-ok"></div>
+          <div class="ar-mana eu" id="ar-mana-0"></div>
+        </div>
+        <div class="ar-baixo">
+          <div class="ar-lider-zona eu" id="ar-lider-eu"></div>
+          <div class="ar-mao" id="ar-mao-eu" aria-label="Sua mão"></div>
+          <div class="ar-pilha" id="ar-pilha-eu"></div>
+        </div>
+      </div>
+      <aside class="ar-gaveta" id="ar-gaveta" hidden>
+        <div class="ar-gaveta-topo"><strong>Diário do duelo</strong><button class="ar-icone-btn" data-ar="diario" title="Fechar">✕</button></div>
+        <div class="ar-gaveta-abas" id="ar-gaveta-abas"></div>
+        <ol id="ar-log" class="ar-log" aria-live="polite"></ol>
+      </aside>
+      <aside class="ar-mercado" id="ar-mercado" hidden></aside>
+      <div class="sobreposicao" id="ar-escolha-mao" hidden></div>
+    </div>
+    <div id="ar-fim" class="sobreposicao" hidden></div>
+    <div id="ar-banner" class="ar-banner" hidden aria-live="assertive"></div>
+    <div id="ar-jogada" class="ar-jogada" hidden aria-live="polite"></div>
+    <div id="ar-cine" class="ar-cine" hidden aria-live="assertive"></div>
+    <div id="ar-descobrir" class="sobreposicao ar-descobrir" hidden></div>
+    <div id="ar-leitura" class="sobreposicao ar-leitura" hidden aria-live="assertive"></div>
+  </section>
+</main>
+
+<div id="ar-vs" class="ar-vs" hidden aria-live="assertive"></div>
+<div class="ar-ajuda sobreposicao" id="ar-ajuda" hidden></div>
+<div id="modal" class="sobreposicao" hidden></div>
+<div id="fim" class="sobreposicao" hidden></div>
+<div id="dialogo-sair" class="sobreposicao" hidden>
+  <div class="janela" role="dialog" aria-modal="true">
+    <h2>Sair do duelo?</h2>
+    <p class="janela-texto">Sair agora conta como derrota.</p>
+    <div class="janela-botoes">
+      <button class="btn" data-sair="nao">Continuar jogando</button>
+      <button class="btn perigo" data-sair="sim">Abandonar</button>
+    </div>
+  </div>
+</div>
+<div id="menu-acao" class="menu-acao" hidden></div>
+<div id="banner" class="banner" hidden aria-live="assertive"></div>
+
+<!-- Comum aos dois modos: lista de artes e sons -->
+<script src="js/comum/artes.js"></script>
+<script src="js/comum/som.js"></script>
+
+<!-- Modo Clássico -->
+<script src="js/classico/cartas/base.js"></script>
+<script src="js/classico/cartas/brasil.js"></script>
+<script src="js/classico/cartas/portugal.js"></script>
+<script src="js/classico/cartas/espanha.js"></script>
+<script src="js/classico/cartas/alemanha.js"></script>
+<script src="js/classico/cartas/japao.js"></script>
+<script src="js/classico/cartas/argentina.js"></script>
+<script src="js/classico/cartas/roma.js"></script>
+<script src="js/classico/cartas/egito.js"></script>
+<script src="js/classico/cartas/china.js"></script>
+<script src="js/classico/cartas/mexico.js"></script>
+<script src="js/classico/cartas/oeste.js"></script>
+<script src="js/classico/cartas/irlanda.js"></script>
+<script src="js/classico/cartas/italia.js"></script>
+<script src="js/classico/cartas/inglaterra.js"></script>
+<script src="js/classico/cartas/russia.js"></script>
+<script src="js/classico/cartas/grecia.js"></script>
+<script src="js/classico/cartas/franca.js"></script>
+<script src="js/classico/cartas/cuba.js"></script>
+<script src="js/classico/cartas/nordicos.js"></script>
+<script src="js/classico/cartas/extras.js"></script>
+<script src="js/classico/cartas/artefatos.js"></script>
+<script src="js/classico/cartas/campos.js"></script>
+<script src="js/classico/cartas/campanha.js"></script>
+<script src="js/classico/cartas/habilidades.js"></script>
+<script src="js/classico/cartas/habilidades-europa.js"></script>
+<script src="js/classico/cartas/parceiros.js"></script>
+<script src="js/classico/motor.js"></script>
+<script src="js/classico/ia.js"></script>
+<script src="js/classico/guia.js"></script>
+<script src="js/classico/interface.js"></script>
+
+<!-- Arena: primeiro os dados (é aqui que se edita), depois o jogo -->
+<script src="js/arena/dados/ajustes.js"></script>
+<script src="js/arena/dados/base.js"></script>
+<script src="js/arena/dados/mundo.js"></script>
+<script src="js/arena/dados/brasil.js"></script>
+<script src="js/arena/dados/japao.js"></script>
+<script src="js/arena/dados/espanha.js"></script>
+<script src="js/arena/dados/grecia.js"></script>
+<script src="js/arena/dados/nordicos.js"></script>
+<script src="js/arena/dados/portugal.js"></script>
+<script src="js/arena/dados/pangeia.js"></script>
+<script src="js/arena/dados/irlanda.js"></script>
+<script src="js/arena/dados/china.js"></script>
+<script src="js/arena/dados/russia.js"></script>
+<script src="js/arena/dados/conferir.js"></script>
+<script src="js/arena/motor.js"></script>
+<script src="js/arena/ia.js"></script>
+<script src="js/arena/mapa.js"></script>
+<script src="js/arena/rede.js"></script>
+<script src="js/arena/mesa.js"></script>

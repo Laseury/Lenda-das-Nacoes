@@ -1,0 +1,11 @@
+# Configuração local do Claude Code (servidor de teste); não faz parte do jogo
+.claude/
+# Arquivos temporários do Windows e de editores
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+.vscode/
+
+# Pasta vazia que o GitHub Desktop criou por engano (pode apagar)
+Lenda das Nacoes/
