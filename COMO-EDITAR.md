@@ -136,8 +136,9 @@ Tudo em `js/arena/dados/ajustes.js`, um número por linha, com a explicação ao
 ## Online
 
 - **No claude.ai**, com os dois conectados e com acesso ao link, o jogo usa a sala do próprio claude.ai.
-- **Fora do claude.ai** (o `index.html` no computador, ou o jogo publicado num site), os dois navegadores se ligam direto (WebRTC). Para se acharem, trocam um recado curto pelo `ntfy.sh`, um serviço público de mensagens, no tópico do código da sala; o jogo em si passa direto entre os dois.
-- Se a rede bloquear o `ntfy.sh`, use **Convite direto**: um cria o convite, manda o texto (WhatsApp, e-mail…), o outro cola, gera a resposta e manda de volta.
+- **Sala com código:** os dois navegadores trocam as jogadas por um servidor público e gratuito de mensagens (MQTT), no tópico do código da sala. Funciona em qualquer rede, inclusive no celular com 4G; se a conexão cair, volta sozinha. Pelo servidor passam só os dados do duelo.
+- Se nenhum servidor de mensagens responder (rede muito fechada), use **Convite direto**: um cria o convite, manda o texto (WhatsApp, e-mail…), o outro cola, gera a resposta e manda de volta.
+- **Os dois precisam abrir o mesmo link do jogo** (por exemplo, o site do GitHub).
 - **Os dois precisam estar com a mesma versão do jogo.** Se um mudar um deck ou um número em `ajustes.js` e o outro não, as partidas saem diferentes e o duelo acaba sem vencedor.
 - Algumas redes muito fechadas (empresas, alguns 4G) não deixam dois navegadores se ligarem direto. Aí a saída é trocar de rede.
 

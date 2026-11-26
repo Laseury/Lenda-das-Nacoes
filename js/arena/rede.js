@@ -1,19 +1,22 @@
-/* Lendas das Nações — Arena · REDE: o online direto entre dois navegadores (WebRTC), sem conta e sem servidor do jogo.
+/* Lendas das Nações — Arena · REDE: o online fora do claude.ai, sem conta e sem servidor do jogo.
  *
- * Como funciona: os dois navegadores se ligam direto um ao outro. Para se acharem, trocam um recado pelo ntfy.sh
- * (serviço público e gratuito de mensagens) num tópico com o código da sala. O recado leva só os dados técnicos da
- * conexão (endereços e chaves do WebRTC), compactados. Depois disso o jogo passa direto entre os dois, sem o ntfy.
- * Se o ntfy não abrir (rede bloqueada), há o Convite direto: um texto que um manda e o outro responde, copiando e colando.
+ * Sala com código (o jeito principal): os dois navegadores falam com um servidor público e gratuito de mensagens (MQTT),
+ * num tópico com o código da sala. Cada um publica a própria "presença" (deck, jogadas ainda não confirmadas, ack) como
+ * mensagem retida; o outro recebe na hora. Nada passa direto entre os aparelhos, então redes que bloqueiam ligação direta
+ * (4G, Wi-Fi de empresa) funcionam. Vão pelo servidor só os dados do duelo (código da sala, decks, jogadas), nada do jogador.
+ * O anfitrião usa o primeiro servidor que responder; o convidado procura a sala em todos ao mesmo tempo.
+ *
+ * Convite direto (reserva): WebRTC copiando e colando um texto, sem servidor de mensagens.
  *
  * A sala devolvida tem o mesmo jeito da sala do claude.ai (presence, peers, onPeers, leave), então a mesa usa as duas igual.
- * AR_REDE.criar(codigo)    → sala do anfitrião, que espera o amigo
- * AR_REDE.entrar(codigo)   → sala do convidado (com a sala antiga como 2º argumento, reconecta nela)
+ * AR_REDE.criar(codigo)    → sala do anfitrião
+ * AR_REDE.entrar(codigo)   → sala do convidado
  * AR_REDE.convite()        → { texto, aceitar(resposta) → sala }
  * AR_REDE.responder(texto) → { texto, pronto: Promise<sala> } */
 const AR_REDE = (() => {
-  const RECADOS = 'ntfy.sh';
-  const TOPICO = codigo => 'lendas-das-nacoes-arena-' + codigo;
-  /* STUN: cada navegador descobre o próprio endereço público. */
+  const SERVIDORES = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
+  const TOPICO = codigo => 'lendas-das-nacoes/arena/v1/' + codigo + '/';
+  /* STUN: cada navegador descobre o próprio endereço público (só o Convite direto usa). */
   const ICE = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }] };
   const disponivel = () => typeof RTCPeerConnection !== 'undefined';
   const espera = (ms, msg) => new Promise((_, nao) => setTimeout(() => nao(new Error(msg)), ms));
@@ -62,70 +65,136 @@ const AR_REDE = (() => {
     dc.addEventListener('open', () => { clearTimeout(t); ok(); });
   });
 
-  /* ───── recados pelo ntfy.sh ───── */
-  function abrirRecados(codigo) {
+  /* ───── cliente MQTT 3.1.1 mínimo (WebSocket) ───── */
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const str = t => { const b = enc.encode(t); return [b.length >> 8, b.length & 255, ...b]; };
+  const tam = n => { const r = []; do { let x = n % 128; n = Math.floor(n / 128); if (n > 0) x |= 128; r.push(x); } while (n > 0); return r; };
+  const pacote = (tipo, corpo) => new Uint8Array([tipo, ...tam(corpo.length), ...corpo]);
+  function conectarMqtt(url, vontade) {
     return new Promise((ok, nao) => {
       let ws;
-      try { ws = new WebSocket(`wss://${RECADOS}/${TOPICO(codigo)}/ws`); } catch (e) { nao(new Error('sem-corretor')); return; }
-      const t = setTimeout(() => { try { ws.close(); } catch (e) { /* nada */ } nao(new Error('sem-corretor')); }, 9000);
+      try { ws = new WebSocket(url, 'mqtt'); } catch (e) { nao(new Error('sem-corretor')); return; }
+      ws.binaryType = 'arraybuffer';
+      const t = setTimeout(() => { try { ws.close(); } catch (e) { /* nada */ } nao(new Error('sem-corretor')); }, 7000);
+      let buf = new Uint8Array(0), pronto = false, bate = null, pid = 1;
       const ouvir = [];
-      ws.onopen = () => {
-        clearTimeout(t);
-        ok({
-          enviar: async obj => { try { await fetch(`https://${RECADOS}/${TOPICO(codigo)}`, { method: 'POST', body: JSON.stringify(obj) }); } catch (e) { /* recado perdido */ } },
-          ouvir: f => ouvir.push(f),
-          fechar: () => { try { ws.close(); } catch (e) { /* nada */ } },
-        });
+      const C = {
+        url, aberto: () => ws.readyState === 1,
+        publicar(topico, texto, reter) { if (ws.readyState !== 1) return; const corpo = [...str(topico), ...enc.encode(texto)]; ws.send(pacote(0x30 | (reter ? 1 : 0), corpo)); },
+        assinar(filtro) { if (ws.readyState !== 1) return; const id = pid++; ws.send(pacote(0x82, [id >> 8, id & 255, ...str(filtro), 0])); },
+        ouvir: f => ouvir.push(f),
+        aoCair: null,
+        fechar() { clearInterval(bate); try { if (ws.readyState === 1) ws.send(new Uint8Array([0xe0, 0])); ws.close(); } catch (e) { /* nada */ } },
       };
-      ws.onmessage = e => { let m; try { m = JSON.parse(e.data); if (m.event !== 'message') return; m = JSON.parse(m.message); } catch (x) { return; } if (m && m.lendas === 1) for (const f of ouvir) f(m); };
-      ws.onerror = () => { clearTimeout(t); nao(new Error('sem-corretor')); };
+      ws.onopen = () => {
+        const id = 'ln' + aleatorio(14);
+        let flags = 0x02, corpo = [...str(id)];
+        if (vontade) { flags |= 0x04 | 0x20; corpo = [...corpo, ...str(vontade), 0, 0]; }
+        ws.send(pacote(0x10, [...str('MQTT'), 4, flags, 0, 40, ...corpo]));
+      };
+      ws.onmessage = e => {
+        const novo = new Uint8Array(e.data), junto = new Uint8Array(buf.length + novo.length);
+        junto.set(buf); junto.set(novo, buf.length); buf = junto;
+        for (;;) {
+          if (buf.length < 2) break;
+          let mult = 1, n = 0, k = 1, b;
+          do { if (k >= buf.length) return; b = buf[k++]; n += (b & 127) * mult; mult *= 128; } while (b & 128);
+          if (buf.length < k + n) break;
+          const tipo = buf[0], corpo = buf.subarray(k, k + n);
+          buf = buf.slice(k + n);
+          if ((tipo & 0xf0) === 0x20) {
+            clearTimeout(t);
+            if (corpo[1] !== 0) { nao(new Error('sem-corretor')); ws.close(); return; }
+            pronto = true;
+            bate = setInterval(() => { if (ws.readyState === 1) ws.send(new Uint8Array([0xc0, 0])); }, 20000);
+            ok(C);
+          } else if ((tipo & 0xf0) === 0x30) {
+            const lt = (corpo[0] << 8) | corpo[1];
+            const topico = dec.decode(corpo.subarray(2, 2 + lt));
+            const ini = 2 + lt + (((tipo >> 1) & 3) ? 2 : 0);
+            const texto = dec.decode(corpo.subarray(ini));
+            for (const f of ouvir) try { f(topico, texto); } catch (x) { console.error(x); }
+          }
+        }
+      };
+      ws.onerror = () => { if (!pronto) { clearTimeout(t); nao(new Error('sem-corretor')); } };
+      ws.onclose = () => { clearInterval(bate); if (pronto && C.aoCair) C.aoCair(); };
     });
   }
 
-  /* Anfitrião: ouve o tópico da sala e aceita um amigo por vez (se ele cair, pode voltar). */
+  /* ───── a sala pelo servidor de mensagens ───── */
+  /* Cada um publica a presença em <tópico>/<id>, retida (quem chega depois recebe). A "vontade" (last will) apaga a presença
+   * se a conexão cair sem aviso, e o outro lado vê o rival sair. */
+  function salaMqtt(C, codigo, eu) {
+    const base = TOPICO(codigo);
+    let minha = {}, saiu = false;
+    const outros = new Map(), ouvintes = [];
+    const avisa = () => setTimeout(() => { for (const f of ouvintes) try { f({}); } catch (e) { console.error(e); } }, 0);
+    let ultimo = '';
+    const publicar = () => { const t = JSON.stringify(minha); ultimo = t; C.publicar(base + eu, t, true); };
+    const ligar = c => {
+      C = c;
+      C.ouvir((topico, texto) => {
+        if (!topico.startsWith(base)) return;
+        const quem = topico.slice(base.length);
+        if (quem === eu) return;
+        if (!texto) { if (outros.delete(quem)) avisa(); return; }
+        try { const p = JSON.parse(texto); if (p && typeof p === 'object') { outros.set(quem, p); avisa(); } } catch (e) { /* recado estranho */ }
+      });
+      C.assinar(base + '+');
+      if (ultimo) publicar();
+      C.aoCair = () => { if (saiu) return; reconectar(); };
+    };
+    /* se a conexão cair, volta ao mesmo servidor (a presença retida segura o lugar) */
+    const reconectar = async () => {
+      for (let n = 0; n < 12 && !saiu; n++) {
+        await new Promise(r => setTimeout(r, 1500 + n * 1000));
+        try { const c = await conectarMqtt(C.url, base + eu); if (saiu) { c.fechar(); return; } ligar(c); return; } catch (e) { /* tenta de novo */ }
+      }
+    };
+    ligar(C);
+    return {
+      sala: {
+        presence: async patch => { for (const k of Object.keys(patch)) { if (patch[k] === null) delete minha[k]; else minha[k] = patch[k]; } publicar(); },
+        peers: () => [{ peer: eu, sameTab: true, isMe: true, presence: minha }].concat([...outros].map(([peer, presence]) => ({ peer, sameTab: false, isMe: false, presence }))),
+        onPeers: f => { ouvintes.push(f); setTimeout(() => f({}), 0); return () => { const k = ouvintes.indexOf(f); if (k >= 0) ouvintes.splice(k, 1); }; },
+        leave: async () => { saiu = true; C.publicar(base + eu, '', true); setTimeout(() => C.fechar(), 300); },
+      },
+      ligado: () => C.aberto(),
+      anfitriao: () => [...outros.values()].some(p => p.papel === 'anfitriao'),
+    };
+  }
+  const espiar = (S, ms) => new Promise(ok => { const t0 = Date.now(); const v = () => { if (S.anfitriao()) ok(true); else if (Date.now() - t0 > ms) ok(false); else setTimeout(v, 150); }; v(); });
+
+  /* Anfitrião: o primeiro servidor que responder. Se já houver um anfitrião com esse código, avisa 'ocupado'. */
   async function criar(codigo) {
-    const C = await abrirRecados(codigo);
-    const S = novaSala();
-    S.fim = () => C.fechar();
-    C.ouvir(async m => {
-      if (m.tipo !== 'oferta' || !m.de) return;
-      if (S.ligado()) { C.enviar({ lendas: 1, tipo: 'cheia', para: m.de }); return; }
+    const erros = [];
+    for (const url of SERVIDORES) {
       try {
-        const pc = new RTCPeerConnection(ICE);
-        const veio = new Promise(ok => { pc.ondatachannel = e => ok(e.channel); });
-        await pc.setRemoteDescription(await desembala('', m.sdp));
-        await pc.setLocalDescription(await pc.createAnswer());
-        await juntarEnderecos(pc);
-        C.enviar({ lendas: 1, tipo: 'resposta', para: m.de, sdp: await embala('', pc.localDescription) });
-        const dc = await Promise.race([veio, espera(20000, 'sem-ligacao')]);
-        S.ligar(dc, pc);
-      } catch (e) { console.warn('Arena online:', e.message); }
-    });
-    return S;
+        const eu = 'p' + aleatorio(10);
+        const C = await conectarMqtt(url, TOPICO(codigo) + eu);
+        const S = salaMqtt(C, codigo, eu);
+        if (await espiar(S, 1200)) { S.sala.leave(); throw new Error('ocupado'); }
+        return S;
+      } catch (e) { if (e.message === 'ocupado') throw e; erros.push(e); }
+    }
+    throw new Error('sem-corretor');
   }
-
-  /* Convidado: manda a oferta no tópico da sala e espera a resposta do anfitrião. */
-  async function entrar(codigo, S = null) {
-    const C = await abrirRecados(codigo);
-    try {
-      const eu = 'c' + aleatorio(12);
-      const pc = new RTCPeerConnection(ICE);
-      const dc = pc.createDataChannel('lendas', { ordered: true });
-      await pc.setLocalDescription(await pc.createOffer());
-      await juntarEnderecos(pc);
-      const resposta = new Promise((ok, nao) => C.ouvir(m => {
-        if (m.para !== eu) return;
-        if (m.tipo === 'cheia') nao(new Error('cheia'));
-        if (m.tipo === 'resposta') ok(m.sdp);
-      }));
-      C.enviar({ lendas: 1, tipo: 'oferta', de: eu, sdp: await embala('', pc.localDescription) });
-      const sdp = await Promise.race([resposta, espera(15000, 'sem-sala')]);
-      await pc.setRemoteDescription(await desembala('', sdp));
-      await canalAberto(dc, 20000);
-      if (!S) S = novaSala();
-      S.ligar(dc, pc);
-      return S;
-    } finally { C.fechar(); }
+  /* Convidado: procura a sala em todos os servidores ao mesmo tempo; fica com o que tiver o anfitrião. */
+  async function entrar(codigo) {
+    const tentativas = SERVIDORES.map(async url => {
+      const eu = 'p' + aleatorio(10);
+      const C = await conectarMqtt(url, TOPICO(codigo) + eu);
+      const S = salaMqtt(C, codigo, eu);
+      if (await espiar(S, 7000)) return S;
+      S.sala.leave();
+      throw new Error('sem-sala');
+    });
+    /* fica com o primeiro que achar o anfitrião; os outros desistem */
+    return new Promise((ok, nao) => {
+      let falhas = 0, semSala = false, feito = false;
+      for (const t of tentativas) t.then(S => { if (feito) { S.sala.leave(); return; } feito = true; ok(S); }, e => { if (e.message === 'sem-sala') semSala = true; if (++falhas === tentativas.length && !feito) nao(new Error(semSala ? 'sem-sala' : 'sem-corretor')); });
+    });
   }
 
   /* ───── Convite direto (copiar e colar) ───── */

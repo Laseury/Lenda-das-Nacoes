@@ -1400,8 +1400,8 @@ const AR_MESA = (() => {
     if (!$('#ar-inicio').hidden) renderInicio();
   }
   const ERROS_REDE = {
-    'sem-corretor': 'O servidor de salas não respondeu nesta rede. Use o Convite direto, logo abaixo.',
-    'sem-sala': 'Não achei uma sala com esse código. Confira o código e se o anfitrião ainda está com a sala aberta.',
+    'sem-corretor': 'Nenhum servidor de salas respondeu nesta rede. Confira a internet e tente de novo, ou use o Convite direto, logo abaixo.',
+    'sem-sala': 'Não achei uma sala com esse código. Confira o código, se o anfitrião ainda está com a sala aberta e se os dois abriram o mesmo link do jogo.',
     cheia: 'Essa sala já tem dois jogadores.',
     'sem-ligacao': 'Os dois navegadores não conseguiram se ligar (a rede bloqueou). Tente de novo, use outra rede ou o Convite direto.',
     'sem-webrtc': 'Este navegador não faz conexão direta (WebRTC). Atualize o navegador ou use outro.',
@@ -1414,12 +1414,7 @@ const AR_MESA = (() => {
         : papel === 'anfitriao' ? 'Sala criada: mande o código para o seu amigo.' : 'Você entrou. O anfitrião começa a partida.' });
     publicarSala({ inicio: null });
     ON.sala.onPeers(salaMudou, () => { if (ON.sala) sairSala('A conexão com a sala caiu.'); });
-    /* convidado da sala direta: se a ligação cair, tenta voltar por 20 segundos */
-    if (S && via === 'direto' && papel === 'convidado') S.aoCair = () => {
-      let n = 0;
-      const tenta = async () => { if (ON.rede !== S || S.ligado()) return; try { await AR_REDE.entrar(codigo, S); } catch (e) { if (++n < 6 && ON.rede === S) setTimeout(tenta, 3000); } };
-      setTimeout(tenta, 1500);
-    };
+    /* na sala pelo servidor de mensagens, a reconexão é automática (js/arena/rede.js) */
     renderInicio();
   }
   async function entrarSala(criar) {
@@ -1428,15 +1423,20 @@ const AR_MESA = (() => {
     if (!/^[a-z0-9]{3,12}$/.test(codigo)) { avisoSala('Digite o código da sala (letras e números).'); return; }
     ON.ocupado = true; avisoSala('Conectando…');
     try {
-      /* No claude.ai, com a pessoa conectada, usa a sala do próprio claude.ai; fora dele, a ligação direta. */
+      /* Primeiro o servidor de mensagens (qualquer navegador, qualquer rede, celular no 4G incluído).
+       * Se ele não abrir (ou a sala não estiver lá), tenta a sala do próprio claude.ai, quando o jogo está aberto nele. */
+      let erro = null;
+      try {
+        if (criar) {
+          let S = null;
+          for (let k = 0; !S; k++) { try { S = await AR_REDE.criar(codigo); } catch (e) { if (e.message !== 'ocupado' || k > 3) throw e; codigo = codigoNovo(); } }
+          usarSala(S, S.sala, 'anfitriao', codigo, 'direto'); return;
+        }
+        const S = await AR_REDE.entrar(codigo); usarSala(S, S.sala, 'convidado', codigo, 'direto'); return;
+      } catch (e) { erro = e; }
       if (!ON.tentouRoom) { ON.tentouRoom = true; ON.room = window.claude && window.claude.use ? await window.claude.use('room').catch(() => null) : null; }
       if (ON.room) { usarSala(null, await ON.room.join('ar-' + codigo), criar ? 'anfitriao' : 'convidado', codigo, 'claude'); return; }
-      if (!AR_REDE.disponivel()) throw new Error('sem-webrtc');
-      if (criar) {
-        let S = null;
-        for (let k = 0; !S; k++) { try { S = await AR_REDE.criar(codigo); } catch (e) { if (e.message !== 'ocupado' || k > 3) throw e; codigo = codigoNovo(); } }
-        usarSala(S, S.sala, 'anfitriao', codigo, 'direto');
-      } else { const S = await AR_REDE.entrar(codigo); usarSala(S, S.sala, 'convidado', codigo, 'direto'); }
+      throw erro;
     } catch (e) {
       ON.ocupado = false; ON.sala = null; ON.rede = null;
       if (e.message === 'sem-corretor') ON.abrirConv = true;
