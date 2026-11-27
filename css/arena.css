@@ -1490,7 +1490,7 @@ span.ar-mao-op { cursor: default; }
   .ar-mao .ar-carta:hover, .ar-mao .ar-carta.escolhida { transform: translateY(-62%) scale(1.25); z-index: 20; }
   .ar-pilha { gap: 0; } .ar-pilha-deck { width: 34px; height: 46px; } .ar-pilha-deck b { font-size: 15px; } .ar-pilha small { font-size: 8px; }
   /* janelas por cima (carta jogada, leitura, zoom, escolhas) cabem na altura */
-  .ar-jogada { top: 50%; gap: 4px; zoom: .58; }
+  .ar-jogada { top: 50%; gap: 4px; }
   .ar-leitura-item .ar-carta.tam-grande { --w: min(170px, 44dvh); min-height: 0; }
   .ar-jogada-rotulo { padding: 2px 10px; font-size: 11px; }
   .ar-zoom { width: auto; }
@@ -1644,4 +1644,44 @@ span.ar-mao-op { cursor: default; }
   .ar-mana .ar-gemas { display: none; }
   .ar-mao .ar-kws { font-size: 9px; } .ar-mao .ar-kws em { font-size: 8px; }
   .tam-campo .ar-kws span { width: 14px; height: 14px; } .tam-campo .ar-kws { font-size: 8.5px; }
+}
+
+/* ═════════════ Celular: sem zoom de toque duplo e sem rolar para o lado ═════════════ */
+html, body { overflow-x: hidden; }
+html { touch-action: manipulation; }
+
+/* Cartas grandes (a jogada do rival, o zoom, a leitura): em telas baixas tudo encolhe junto com a largura da carta */
+@media (max-height: 760px) {
+  .ar-carta.tam-grande { min-height: 0; }
+  .tam-grande .ar-arte { height: calc(var(--w) * .56); }
+  .tam-grande .ar-nome { font-size: calc(var(--w) * .088); padding-top: calc(var(--w) * .02); }
+  .tam-grande .ar-texto { font-size: max(9px, calc(var(--w) * .058)); line-height: 1.3; padding: 4px calc(var(--w) * .045); }
+  .tam-grande .ar-kws { font-size: calc(var(--w) * .066); gap: calc(var(--w) * .035); }
+  .tam-grande .ar-kws em { font-size: max(8px, calc(var(--w) * .054)); }
+  .tam-grande .ar-atk, .tam-grande .ar-vida { min-width: calc(var(--w) * .17); height: calc(var(--w) * .17); font-size: calc(var(--w) * .1); }
+  .tam-grande .ar-custo { width: calc(var(--w) * .17); height: calc(var(--w) * .17); font-size: calc(var(--w) * .092); top: -8px; left: -8px; }
+  .tam-grande .ar-tipo { font-size: max(8px, calc(var(--w) * .046)); }
+  .ar-jogada .ar-carta, .ar-jogada .ar-carta.tam-grande { --w: min(230px, 40dvh); min-height: 0; }
+  .ar-jogada-rotulo { font-size: 12px; padding: 2px 10px; }
+  .ar-zoom .ar-carta.tam-grande { --w: min(250px, 44dvh); }
+  .ar-leitura-item .ar-carta.tam-grande { --w: min(240px, 42dvh); min-height: 0; }
+}
+@media (max-height: 760px) and (orientation: landscape) {
+  .ar-leitura-caixa { flex-wrap: nowrap; gap: 14px; }
+  .ar-leitura-item .ar-carta.tam-grande { --w: min(240px, 46dvh); }
+  .ar-leitura-lado { width: min(320px, 44vw); }
+}
+/* Menu: a fileira de Líderes quebra em linhas e nunca passa da tela */
+.mn-lideres { flex-wrap: wrap; row-gap: 10px; max-width: 100vw; overflow: hidden; }
+@media (max-width: 1100px) {
+  .mn-lideres { gap: 8px 10px; padding-top: 8px; }
+  .mn-lider span { width: 42px; }
+  .mn-lider small { font-size: 10px; letter-spacing: .03em; }
+}
+@media (max-height: 540px) and (min-width: 560px) {
+  .mn-centro { padding: 46px 16px 10px; }
+  .mn-centro .titulo { font-size: clamp(38px, 7vw, 64px); }
+  .mn-lema { font-size: 14px; margin: 4px 0 10px; }
+  .mn-jogar { padding: 10px 40px; font-size: 22px; }
+  .mn-lider span { width: 36px; }
 }
