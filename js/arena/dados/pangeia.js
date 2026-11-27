@@ -7,12 +7,12 @@
 /* ═════════════════════ Ferramentas deste deck (usadas pelas cartas abaixo) ═════════════════════ */
 const BENCAOS_PANGEIA = {
   tempestade: 'seus Elusivos continuam Elusivos e suas Táticas custam 1 a menos.',
-  eclipse: 'você compra até ter 5 (no mínimo 1) e não descarta nada.',
+  eclipse: 'você compra 2 cartas e não descarta nada.',
   feira: 'o Mercado fica de graça (continua 1 compra por rodada).',
   inverno: 'suas unidades não perdem Ataque nem caem, e têm +1 de Vida.',
   lua: 'a sua Fúria dá +2/+2 em vez de +1/+1.',
   ouro: 'você recebe +2 de Influência em vez de +1.',
-  peste: 'suas unidades não adoecem e curam 1 por rodada; cada rival que cair pela Peste cura 1 da sua Capital.',
+  peste: 'suas unidades não pegam a Peste e curam 1 por rodada; cada infectada rival que cair cura 1 da sua Capital.',
   paz: 'você pode atacar com todas as suas unidades.',
   ventos: 'suas unidades que atacam ganham +2 de Ataque em vez de +1.',
   renascimento: 'a primeira queda da rodada também cura 2 da sua Capital.',

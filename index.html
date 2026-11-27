@@ -1,6 +1,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Lendas das Nações</title>
+<!-- Tela cheia: no iPhone, "Adicionar à Tela de Início" abre o jogo sem a barra do navegador -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lendas">
+<meta name="theme-color" content="#071419">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="icon" href="favicon.ico" sizes="32x32 48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +42,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
     <div class="mn-topo">
       <button class="ar-icone-btn" data-ar="regras" title="Como jogar">?</button>
       <button class="ar-icone-btn btn-som" data-som="1" title="Ligar ou desligar o som">🔊</button>
+      <button class="ar-icone-btn" data-tela-cheia title="Tela cheia">⛶</button>
     </div>
     <div class="mn-centro">
       <p class="sobretitulo">Duelo de cartas</p>
@@ -274,6 +285,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
         <div class="lateral-topo">
           <span class="lateral-marca">Lendas das Nações</span>
           <button class="btn pequeno btn-som" data-som="1" title="Ligar ou desligar o som">🔊</button>
+          <button class="btn pequeno" data-tela-cheia title="Tela cheia">⛶</button>
           <button class="btn pequeno" id="btn-sair">Sair do duelo</button>
         </div>
         <div class="preview" id="preview"></div>
@@ -374,6 +386,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
             <button class="ar-icone-btn ar-btn-estrategia" data-ar="estrategia" title="Estratégia do seu deck: como jogar com ele">🧭</button>
             <button class="ar-icone-btn" data-ar="diario" title="Diário do duelo">📜</button>
             <button class="ar-icone-btn" data-ar="ajuda" title="Como jogar">?</button>
+            <button class="ar-icone-btn" data-tela-cheia title="Tela cheia">⛶</button>
             <button class="ar-icone-btn" data-ar="sair" title="Sair do duelo">✕</button>
           </div>
         </div>
@@ -444,6 +457,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
 <!-- Comum aos dois modos: lista de artes e sons -->
 <script src="js/comum/artes.js"></script>
 <script src="js/comum/som.js"></script>
+<script src="js/comum/tela-cheia.js"></script>
 
 <!-- Modo Clássico -->
 <script src="js/classico/cartas/base.js"></script>
@@ -495,6 +509,7 @@ window.addEventListener('error', e => { if (e.filename && !window.jogoCarregou) 
 <script src="js/arena/dados/oeste.js"></script>
 <script src="js/arena/dados/incas.js"></script>
 <script src="js/arena/dados/dracula.js"></script>
+<script src="js/arena/dados/roma.js"></script>
 <script src="js/arena/dados/conferir.js"></script>
 <script src="js/arena/motor.js"></script>
 <script src="js/arena/ia.js"></script>

@@ -6,12 +6,12 @@
  * O efeito de cada um está no motor (js/arena/motor.js); aqui ficam o nome, o ícone e o texto. */
 const AR_MUNDO = {
   tempestade: { id: 'tempestade', nome: 'Tempestade no Atlântico', icone: '⛈️', texto: 'Ninguém tem Elusivo e as Táticas custam 1 a mais.' },
-  eclipse: { id: 'eclipse', nome: 'Eclipse', icone: '🌑', texto: 'Os dois compram até ter 5 cartas na mão e depois descartam 3.' },
+  eclipse: { id: 'eclipse', nome: 'Eclipse', icone: '🌑', texto: 'Os dois compram 5 cartas e depois descartam 3. Enquanto durar, é Noite.' },
   feira: { id: 'feira', nome: 'Grande Feira', icone: '🎪', texto: 'No começo de cada rodada, os dois compram 1 carta a mais.' },
   inverno: { id: 'inverno', nome: 'Inverno Rigoroso', icone: '❄️', texto: 'Todas as unidades têm -1 de Ataque. Quem ficar com 0 de Ataque é destruído.' },
   lua: { id: 'lua', nome: 'Lua de Sangue', icone: '🩸', texto: 'Todas as unidades têm Fúria: quem derruba em combate e sobrevive ganha +1/+1.' },
   ouro: { id: 'ouro', nome: 'Era de Ouro', icone: '👑', texto: 'Os dois começam cada rodada com +1 de Influência, que pode passar do limite de 10. Some quando o evento acaba.' },
-  peste: { id: 'peste', nome: 'Peste', icone: '☠️', texto: 'No fim de cada rodada, todas as unidades sofrem 1 de dano. Quem morre dá lugar à Peste: ficha imóvel que cresce com as mortes, fere quem você invoca e encarece suas Táticas. Some se você gastar 5 de Influência.' },
+  peste: { id: 'peste', nome: 'Peste', icone: '☠️', texto: 'Contágio: no começo de cada rodada, a unidade mais forte de cada jogador pega a Peste 🦠. A infectada sofre 1 de dano no fim da rodada e passa a Peste para quem lutar com ela. Qualquer cura a salva. Se uma infectada cair, a Capital do dono sofre 1 de dano.' },
   paz: { id: 'paz', nome: 'Paz Armada', icone: '🕊️', texto: 'Só 2 unidades podem atacar por vez (as mais fortes).' },
   ventos: { id: 'ventos', nome: 'Ventos de Guerra', icone: '🌪️', texto: 'Unidades que atacam ganham +1 de Ataque.' },
   renascimento: { id: 'renascimento', nome: 'Renascimento', icone: '🌱', texto: 'Na 1ª vez em cada rodada que um aliado seu cair, compre 1 carta.' },

@@ -82,6 +82,7 @@ const AR = (() => {
     if (G && k === 'elusivo' && api.sofre(G.jog[u.dono], 'tempestade')) return false;
     if (G && k === 'furia' && (api.mundo() === 'lua' || api.bencao(G.jog[u.dono], 'lua'))) return true;
     if (u.kw.has(k) || u.kwTemp.has(k)) return true;
+    if (k === 'furia' && G && u.romanizada && G.jog[u.dono].continuas.some(x => x.d.coliseu)) return true;
     if (k === 'drenar' && G && G.noite && (u.kw.has('vampiro') || u.kwTemp.has('vampiro'))) return true;
     if (G && G.ano && api.chines(u) && ((G.ano === 'cabra' && k === 'regenera') || (G.ano === 'boi' && k === 'robusto' && api.bloqueando(u)) || (G.ano === 'cavalo' && k === 'rapido' && api.emAtaque(u)))) return true;
     if (u.d.adapta && G && u.d.adapta[api.clima()] === k) return true;
@@ -100,6 +101,7 @@ const AR = (() => {
     let v = u.d.atk + u.permAtk + u.tempAtk;
     if (api.temSol(G.jog[u.dono])) v += solAtk(G.jog[u.dono], u);
     if (G.ciclo) v += cicloAtk(u);
+    if (u.romanizada && api.temLei(G.jog[u.dono], 'legioes')) v += 1;
     if (api.temKw(u, 'procurado') && G.jog.some(q => q.i !== u.dono && api.temLei(q, 'cartazes'))) v -= 1;
     if (api.sofre(G.jog[u.dono], 'inverno')) v -= 1;
     if (api.emAtaque(u)) v += api.bencao(G.jog[u.dono], 'ventos') ? 2 : api.mundo() === 'ventos' ? 1 : 0;
@@ -281,28 +283,39 @@ const AR = (() => {
   }
 
   /* ───────── Sol de Inti (Incas) ─────────
-   * Decks com sol: true. A Influência máxima é o Sol: começa em A.solInicial e cai 1 por rodada. Acelerar faz o Sol cair na hora
-   * (a Influência da rodada fica; a Profecia já olha o Sol novo). Quando chega a 0, Pachakuti: o Sol volta a A.solInicial. */
+   * Decks com sol: true. A Influência é a de todo mundo (começa em 1 e cresce). O Sol começa em A.solInicial (20) e cai 1 por
+   * rodada; Acelerar faz ele cair na hora. Quando chega a 0, vem o Pachakuti: o resto do deck vira o Panteão (a lista
+   * panteao do deck, os deuses), você compra 2 e a Era dos Deuses dura até o fim da partida (o Sol fica em 0). */
   api.temSol = p => !!(p && p.sol !== undefined);
+  api.eraDosDeuses = p => !!(p && p.deuses);
   api.profeciaOk = (p, c) => !c.d.profecia || !api.temSol(p) || p.sol <= c.d.profecia;
   function solCai(p, n, acelerou) {
-    if (!api.temSol(p) || n <= 0 || G.vencedor !== null) return;
+    if (!api.temSol(p) || p.deuses || n <= 0 || G.vencedor !== null) return;
     p.sol = Math.max(0, p.sol - n);
     if (acelerou) log(`${p.nome} acelera o Sol: ☀️${p.sol}.`, 'saga');
     fx('sol', { p, n, acelerou: !!acelerou });
     evento('sol', { p, n, acelerou: !!acelerou });
-    if (acelerou && api.temLei(p, 'qhapaq')) api.comprar(p, 1);
-    if (p.sol <= 0 && G.vencedor === null) {
-      p.sol = A.solInicial;
-      p.pachakutis = (p.pachakutis || 0) + 1;
-      log(`Pachakuti! O mundo vira e o Sol de ${p.nome} volta a ☀️${p.sol}.`, 'saga');
-      fx('sol', { p, n: 0, virou: true });
+    if (acelerou && api.temLei(p, 'qhapaq') && p.qhapaqRodada !== G.rodada) { p.qhapaqRodada = G.rodada; api.comprar(p, 1); }
+    if (p.sol <= 0 && !p.deuses && G.vencedor === null) pachakuti(p);
+  }
+  function pachakuti(p) {
+    p.deuses = true;
+    const D = AR_DECKS[p.deckId];
+    log(`🌀 Pachakuti! O mundo vira: começa a Era dos Deuses de ${p.nome}.`, 'saga');
+    if (D.panteao) {
+      p.deck = [];
+      for (const [cid, n] of D.panteao) for (let k = 0; k < n; k++) p.deck.push(carta(cid, p.i));
+      embaralhar(p.deck);
+      log(`O deck de ${p.nome} vira o Panteão: ${p.deck.length} cartas de deuses.`, 'saga');
     }
+    fx('sol', { p, n: 0, virou: true });
+    evento('pachakuti', { p });
+    if (G.vencedor === null) api.comprar(p, 2);
   }
   api.acelerarSol = (p, n = 1) => solCai(p, n, true);
   /* bônus das Leis da Saga Inca */
-  const solAtk = (p, u) => (api.temLei(p, 'raymi') && u.d.profecia ? 1 : 0);
-  const solVida = (p, u) => (api.temLei(p, 'raymi') && u.d.profecia ? 1 : 0) + (api.temLei(p, 'machu') && u.d.custo >= 7 && u.d.nacao === 'PE' ? 1 : 0);
+  const solAtk = (p, u) => (api.temLei(p, 'raymi') && u.d.nacao === 'PE' ? 1 : 0);
+  const solVida = (p, u) => (api.temLei(p, 'machu') && u.d.nacao === 'PE' ? 1 : 0);
 
   /* ───────── Dia e Noite (Transilvânia) ─────────
    * Só liga quando algum deck da partida tem ciclo: true. A partida começa de Dia e vira a cada rodada. Cartas forçam a Noite
@@ -332,6 +345,97 @@ const AR = (() => {
   api.ganharSangue = (p, n) => { if (n <= 0 || !AR_DECKS[p.deckId].ciclo) return; p.sangue = (p.sangue || 0) + n; fx('sangue', { p, n }); evento('sangue', { p, n }); };
   /* o rival descarta n cartas (ele escolhe) */
   api.fazerDescartar = (p, n, titulo) => escolherMao(p, 'descartar', n, titulo || `Descarte ${n} carta(s)`);
+
+  /* ───────── Roma: Expansão e Captura ─────────
+   * Decks com captura: true. Tudo que Roma toma do rival vira 1 Província (o contador da Saga).
+   * Espólio de guerra: um Romano que derruba um inimigo em combate e sobrevive leva a carta dele para a mão de Roma.
+   * A carta capturada é Romanizada: unidade entra com +2/+1; Tática ou Relíquia custa 1 a menos. Ou vai ao Tesouro:
+   * descarte e ganhe Influência igual à metade do custo (mínimo 1) e +1 Província.
+   * Vagas de Espólio: até +3 Relíquias além das 3 normais, só para Relíquias capturadas (Fórum, Lei Vias Romanas, César ascendido). */
+  api.capturador = u => !!u && !!u.d && !!AR_DECKS[G.jog[u.dono].deckId].captura && (u.d.nacao === 'RM' || !!u.romanizada);
+  api.capturavel = u => !!u && !!u.d && !u.d.ficha && !u.d.heroi && !u.d.climax && !u.d.campeao && !u.d.peste && !u.d.doLider && !u.d.fusao && !u.d.deus;
+  api.provincias = p => (p && p.provincias) || 0;
+  api.espolios = p => [...p.segredos, ...p.continuas].filter(k => k.romanizada).length;
+  api.vagasEspolio = p => (AR_DECKS[p.deckId].captura ? Math.min(3, p.continuas.filter(k => k.d.forum).length + (api.temLei(p, 'vias') ? 1 : 0) + (p.lider && p.lider.nivel >= 2 ? 1 : 0)) : 0);
+  api.cabeReliquia = (p, c) => {
+    const total = api.reliquias(p), teto = RELIQUIAS_MAX + api.vagasEspolio(p);
+    if (c.romanizada) return total < teto;
+    return [...p.segredos, ...p.continuas].filter(k => !k.romanizada).length < RELIQUIAS_MAX && total < teto;
+  };
+  api.ganharProvincia = (p, n = 1) => {
+    if (!AR_DECKS[p.deckId].captura || n <= 0 || G.vencedor !== null) return;
+    p.provincias = api.provincias(p) + n;
+    fx('provincia', { p, n });
+    evento('provincia', { p, n });
+  };
+  const valorTesouro = c => Math.max(1, Math.floor((c.d.custo || 0) / 2));
+  function irAoTesouro(p, c, motivo) {
+    const n = valorTesouro(c);
+    p.inf += n;
+    log(`🏛️ ${motivo || `${c.d.nome} vai ao Tesouro`}: ${p.nome} ganha ${n} de Influência.`, 'saga');
+    fx('tesouro', { p, c, n });
+    api.ganharProvincia(p, 1);
+  }
+  /* uma carta (pelo id) entra Romanizada na mão de Roma */
+  api.capturarCarta = (q, id, motivo = 'Captura') => {
+    const c = { ...cartaVista(id, q.i), romanizada: true };
+    if (AR_CARTAS[id].tipo === 'unidade') q.capturadas = [...(q.capturadas || []), id];
+    if (q.mao.length >= MAO_MAX) { irAoTesouro(q, c, `${motivo}: a mão está cheia e ${c.d.nome} vai ao Tesouro`); evento('captura', { p: q, c }); return null; }
+    q.mao.push(c);
+    log(`🦅 ${motivo}: ${c.d.nome} vai para a mão de ${q.nome}.`, 'saga');
+    fx('captura', { p: q, c });
+    api.ganharProvincia(q, 1);
+    evento('captura', { p: q, c });
+    return c;
+  };
+  /* marca um inimigo que vai cair: quando cair, a carta dele vai para Roma em vez do cemitério */
+  api.marcarCaptura = (q, u) => { if (api.capturavel(u) && u.dono !== q.i) u.capturadaPor = q.i; };
+  /* Saque: uma Relíquia do rival (Contínua ou Segredo) passa para Roma */
+  api.saquear = q => {
+    const r = api.oponente(q), pool = [...r.continuas, ...r.segredos];
+    if (!pool.length) return false;
+    const c = pool[Math.floor(api.rand() * pool.length)];
+    const lista = c.d.tipo === 'segredo' ? 'segredos' : 'continuas';
+    r[lista] = r[lista].filter(x => x !== c);
+    const novo = { ...c, dono: q.i, romanizada: true, publica: true };
+    log(`🦅 Saque: ${q.nome} toma ${c.d.tipo === 'segredo' ? 'um Segredo' : c.d.nome} de ${r.nome}.`, 'saga');
+    if (api.reliquias(q) < RELIQUIAS_MAX + api.vagasEspolio(q)) { q[lista] = [...q[lista], novo]; fx('saque', { p: q, c: novo }); api.ganharProvincia(q, 1); }
+    else irAoTesouro(q, novo, `Sem vaga para ${novo.d.nome}: vai ao Tesouro`);
+    evento('captura', { p: q, c: novo, reliquia: true });
+    return true;
+  };
+  /* Cativos: uma carta aleatória da mão do rival */
+  api.levarCativo = q => {
+    const r = api.oponente(q);
+    if (!r.mao.length) return false;
+    const c = r.mao[Math.floor(api.rand() * r.mao.length)];
+    r.mao = r.mao.filter(x => x !== c);
+    const novo = { ...c, dono: q.i, romanizada: true, publica: true };
+    log(`🦅 Cativos: ${q.nome} leva uma carta da mão de ${r.nome}.`, 'saga');
+    if (q.mao.length >= MAO_MAX) irAoTesouro(q, novo, `A mão está cheia: ${novo.d.nome} vai ao Tesouro`);
+    else { q.mao.push(novo); fx('captura', { p: q, c: novo }); api.ganharProvincia(q, 1); }
+    evento('captura', { p: q, c: novo });
+    return true;
+  };
+  /* Tributo: tira n de Influência do rival e dá para Roma */
+  api.tributo = (q, n = 1) => {
+    const r = api.oponente(q), t = Math.min(n, Math.max(0, r.inf));
+    if (!t) { log(`Tributo: ${r.nome} não tem Influência para pagar.`); return 0; }
+    r.inf -= t; q.inf += t;
+    log(`🪙 Tributo: ${r.nome} paga ${t} de Influência a ${q.nome}.`, 'saga');
+    fx('tributo', { p: q, n: t });
+    return t;
+  };
+  /* Tesouro: a carta Romanizada da mão vira Influência e Província (ação livre, na sua vez) */
+  api.tesouro = (p, c) => {
+    if (!api.minhaVez(p) || G.fase !== 'acao' || G.pilha.length || !c || !c.romanizada || !p.mao.includes(c)) return false;
+    p.mao.splice(p.mao.indexOf(c), 1);
+    irAoTesouro(p, c);
+    evento('tesouro', { p, c });
+    limpar();
+    return true;
+  };
+  function jogouRomanizada(p, c) { if (c.romanizada) { fx('romanizada', { p, c }); evento('romanizada', { p, c }); } }
 
   /* ───────── Saga ───────── */
   api.marco = (p, id) => {
@@ -514,8 +618,17 @@ const AR = (() => {
     }
   };
   /* Cura dano de uma unidade. */
+  /* Peste (Contágio): a unidade infectada adoece no fim da rodada e passa a Peste em combate. Qualquer cura a salva. */
+  api.infectar = u => {
+    if (!u || !api.noCampo(u) || u.infectado || u.d.peste || api.pangeia(G.jog[u.dono])) return;
+    u.infectado = true;
+    log(`🦠 ${u.d.nome} pegou a Peste.`, 'mundo');
+    fx('infectar', { u });
+  };
   api.curar = (u, n) => {
-    if (!u || !api.noCampo(u) || !u.dano) return;
+    if (!u || !api.noCampo(u)) return;
+    if (u.infectado && n > 0) { u.infectado = false; log(`${u.d.nome} se cura da Peste.`, 'cura'); fx('curaPeste', { u }); }
+    if (!u.dano) return;
     const c = Math.min(u.dano, n);
     u.dano -= c;
     log(`${u.d.nome} cura ${c}.`, 'cura');
@@ -671,10 +784,13 @@ const AR = (() => {
     if ((api.mundo() === 'renascimento' || api.bencao(p, 'renascimento')) && !u.d.ficha && p.renasce !== G.rodada) { p.renasce = G.rodada; G.renasceu = p.i; }
     p.campo.splice(k, 1);
     const eHeroi = !u.d.campeao && api.heroi(u);
-    if (!u.d.ficha && !u.d.climax && !u.d.fusao && !u.d.campeao && !eHeroi) p.mortos.push(u.id);
+    const captor = u.capturadaPor != null && u.capturadaPor !== p.i ? G.jog[u.capturadaPor] : null;
+    if (!captor && !u.d.ficha && !u.d.climax && !u.d.fusao && !u.d.campeao && !eHeroi) p.mortos.push(u.id);
     if (eHeroi) { p.deck.push(carta(u.id, p.i)); embaralhar(p.deck); log(`${u.d.nome} volta ao deck de ${p.nome} e guarda o nível ${u.d.heroi.nivel}.`, 'lider'); }
     log(`${u.d.nome} cai.`, 'morte');
     fx('morte', { u });
+    if (captor && G.vencedor === null) api.capturarCarta(captor, u.id, 'Espólio de guerra');
+    if (u.infectado && api.mundo() === 'peste') { log(`A Peste de ${u.d.nome} atinge a Capital de ${p.nome}.`, 'mundo'); api.danoCapital(p, 1); const r = api.oponente(p); if (api.pangeia(r)) api.curarCapital(r, 1); }
     if (api.temKw(u, 'procurado')) for (const q of G.jog) if (q !== p && AR_DECKS[q.deckId].recompensa) cobrarRecompensa(q, u);
     /* caiu por causa do Gelo (sem ele, ainda teria Vida): vira Estilhaço na mão do dono */
     if ((u.gelo || 0) > 0 && !u.d.peste && api.vidaMax(u) - u.dano > 0) darEstilhaco(p);
@@ -746,6 +862,7 @@ const AR = (() => {
     if (c.d.evolui) n -= p.campo.filter(u => u.d.descontoEvolucao).reduce((s, u) => s + u.d.descontoEvolucao, 0) + (api.temLei(p, 'gi') ? 1 : 0);
     if (c.d.tipo === 'tatica' && (api.temLei(p, 'solea') || api.temLei(p, 'armas')) && !p.taticasRodada) n -= 1;
     if (c.descoberta && api.temLei(p, 'bojador')) n -= 1;
+    if (c.romanizada && c.d.tipo !== 'unidade') n -= 1;
     if (c.d.signo && G.ano === c.d.signo && p.nascido !== G.rodada) n -= 1;
     if (c.d.tipo === 'tatica') n += api.bencao(p, 'tempestade') ? -1 : api.mundo() === 'tempestade' ? 1 : 0;
     if (c.d.tipo === 'tatica' && p.peste) n += 1;
@@ -779,10 +896,10 @@ const AR = (() => {
     if (!api.profeciaOk(p, c)) return false;
     if (api.custo(p, c) > pagavel(p, c)) return false;
     if (c.d.tipo === 'unidade' && !AR_DECKS[p.deckId].soCampeao) return p.campo.length < CAMPO_MAX || api.podeSacrificar(p);
-    if (c.d.tipo === 'segredo') return api.reliquias(p) < RELIQUIAS_MAX && !p.segredos.some(s => s.id === c.id);
+    if (c.d.tipo === 'segredo') return api.cabeReliquia(p, c) && !p.segredos.some(s => s.id === c.id);
     if (c.d.tipo === 'equipamento') { const u = api.campeao(p); return !!u && !u.equip; }
     if (c.d.tipo === 'unidade' && AR_DECKS[p.deckId].soCampeao) return false;
-    if (c.d.tipo === 'continua') return api.reliquias(p) < RELIQUIAS_MAX && !p.continuas.some(s => s.id === c.id);
+    if (c.d.tipo === 'continua') return api.cabeReliquia(p, c) && !p.continuas.some(s => s.id === c.id);
     if (c.d.pode && !c.d.pode(p)) return false;
     if (c.d.alvo && !c.d.alvo.opcional && !api.alvos(p, c.d.alvo).length) return false;
     return true;
@@ -843,6 +960,8 @@ const AR = (() => {
       pagar(p, custo, false);
       p.mao.splice(p.mao.indexOf(c), 1);
       const u = entrar(p, novaUnidade(c.id, p), true);
+      if (u && c.romanizada) { u.romanizada = true; u.permAtk += 2; u.permVida += 1; }
+      jogouRomanizada(p, c);
       if (c.d.signo && G.ano === c.d.signo) p.nascido = G.rodada;
       log(`${p.nome} joga ${c.d.nome}.`, 'invocar');
       if (u && c.d.grito) gritoCom(p, u, c.d, alvo && api.noCampo(alvo) ? alvo : escolherAlvoGrito(p, u, true));
@@ -859,12 +978,14 @@ const AR = (() => {
       pagar(p, custo, true);
       p.mao.splice(p.mao.indexOf(c), 1);
       p.segredos.push(c);
+      jogouRomanizada(p, c);
       log(`${p.nome} prepara um Segredo.`, 'segredo');
       fx('segredoPosto', { p, c });
     } else if (c.d.tipo === 'continua') {
       pagar(p, custo, true);
       p.mao.splice(p.mao.indexOf(c), 1);
       p.continuas.push(c);
+      jogouRomanizada(p, c);
       log(`${p.nome} ergue ${c.d.nome} (Contínua).`, 'tatica');
       fx('continua', { p, c });
       if (c.d.aoEntrar) c.d.aoEntrar(c, p);
@@ -874,6 +995,7 @@ const AR = (() => {
       pagar(p, custo, true);
       p.mao.splice(p.mao.indexOf(c), 1);
       p.taticasRodada = (p.taticasRodada || 0) + 1;
+      jogouRomanizada(p, c);
       empilhar(p, { tipo: 'tatica', c, alvo });
       return true;
     }
@@ -1084,6 +1206,16 @@ const AR = (() => {
       if (x.b && x.bMorre && x.a.d.campeao) api.gaeMatou(x.a, x.atkB);
       if (x.b && x.aMorre && x.b.d.campeao) api.gaeMatou(x.b, x.atkA);
     }
+    for (const x of resumo.pares) {
+      if (!x.b) continue;
+      if (x.bMorre && api.capturador(x.a) && (!x.aMorre || x.a.conquista === G.rodada || x.a.d.sempreCaptura)) api.marcarCaptura(G.jog[x.a.dono], x.b);
+      if (x.aMorre && api.capturador(x.b) && (!x.bMorre || x.b.conquista === G.rodada || x.b.d.sempreCaptura)) api.marcarCaptura(G.jog[x.b.dono], x.a);
+    }
+    if (api.mundo() === 'peste') for (const x of resumo.pares) {
+      if (!x.b) continue;
+      if (x.a.infectado && !x.bMorre) api.infectar(x.b);
+      else if (x.b.infectado && !x.aMorre) api.infectar(x.a);
+    }
     if (G.ciclo && G.noite) for (const x of resumo.pares) {
       const par = x.b && x.bMorre && !x.aMorre ? [x.a, x.b] : x.b && x.aMorre && !x.bMorre ? [x.b, x.a] : null;
       if (!par || !api.vampiro(par[0]) || par[1].d.ficha || par[1].d.peste) continue;
@@ -1126,12 +1258,11 @@ const AR = (() => {
   function fimRodada() {
     for (const p of G.jog) if (api.temLei(p, 'fandango')) { log('Fandango: o compás fere a Capital rival.'); api.danoCapital(api.oponente(p), 1); }
     if (api.mundo() === 'peste') {
-      log('Peste: todas as unidades adoecem.', 'mundo');
-      for (const u of api.todas().filter(x => !api.pangeia(G.jog[x.dono]))) { if (api.temKw(u, 'barreira')) api.dano(u, 1, null); else { u.dano += 1; fx('dano', { u, n: 1 }); } }
-      const mortas = G.jog.map(p => p.campo.filter(u => api.vida(u) <= 0).length);
+      const inf = api.todas().filter(u => u.infectado);
+      if (inf.length) log('Peste: as unidades infectadas adoecem.', 'mundo');
+      for (const u of inf) api.dano(u, 1, null);
       limpar();
       if (G.vencedor !== null) return;
-      for (const p of G.jog) if (mortas[p.i] > 0 && !api.pangeia(p)) { nascerPeste(p, mortas[p.i]); if (api.pangeia(api.oponente(p))) api.curarCapital(api.oponente(p), mortas[p.i]); }
     }
     for (const p of G.jog) if (api.bencao(p, 'peste')) for (const u of p.campo) api.curar(u, 1);
     if (G.mundo) for (const p of G.jog) if (api.pangeia(p)) viverEra(p);
@@ -1171,10 +1302,16 @@ const AR = (() => {
     }
     if (G.rodada >= 3 && (G.rodada - 3) % 3 === 0 && typeof AR_MUNDO !== 'undefined') revelarMundo();
     if (G.vencedor !== null) return;
-    if (G.ciclo && G.rodada > 1) { if (G.luaPresa) { G.luaPresa = false; log('🌕 A Lua Cheia segura a Noite.', 'mundo'); } else api.virarCiclo(!G.noite); }
+    if (api.mundo() === 'peste') {
+      for (const p of G.jog) {
+        const alvo = p.campo.filter(u => !u.infectado && !u.d.peste).sort((a, b) => api.atk(b) - api.atk(a) || api.vida(b) - api.vida(a) || a.uid - b.uid)[0];
+        if (alvo) api.infectar(alvo);
+      }
+    } else for (const u of api.todas()) if (u.infectado) u.infectado = false;
+    if (G.ciclo && G.rodada > 1) { if (G.luaPresa) { G.luaPresa = false; log('🌕 A Lua Cheia segura a Noite.', 'mundo'); } else if (api.mundo() === 'eclipse') api.virarCiclo(true, 'Eclipse'); else api.virarCiclo(!G.noite); }
     for (const p of G.jog) {
-      if (api.temSol(p)) { if (G.rodada > 1) solCai(p, 1, false); p.maxInf = p.sol; }
-      else p.maxInf = Math.min(INF_MAX, p.maxInf + 1);
+      if (api.temSol(p) && G.rodada > 1) solCai(p, 1, false);
+      p.maxInf = Math.min(INF_MAX, p.maxInf + 1);
       p.inf = p.infTeto = p.maxInf + (api.bencao(p, 'ouro') ? 2 : api.mundo() === 'ouro' ? 1 : 0);
       p.comprasRodada = 0;
       p.investidas = 0;
@@ -1208,8 +1345,9 @@ const AR = (() => {
   const comprarSeguro = (p, n = 1) => { for (let k = 0; k < n && p.deck.length && p.mao.length < MAO_MAX; k++) p.mao.push(p.deck.shift()); };
   /* Eclipse: os dois compram até ter 5 e descartam 3. */
   function eclipse() {
-    log('Eclipse: os dois compram até ter 5 cartas e descartam 3.', 'mundo');
-    for (const p of G.jog) comprarSeguro(p, Math.min(api.pangeia(p) ? Math.max(0, p.deck.length - 5) : 99, Math.max(api.pangeia(p) ? 1 : 0, 5 - p.mao.length)));
+    log('Eclipse: os dois compram 5 cartas e descartam 3. Enquanto durar, é Noite.', 'mundo');
+    api.virarCiclo(true, 'Eclipse');
+    for (const p of G.jog) comprarSeguro(p, api.pangeia(p) ? Math.min(2, Math.max(0, p.deck.length - 5)) : 5);
     for (const p of G.jog) if (!api.pangeia(p)) escolherMao(p, 'descartar', 3, 'Eclipse: descarte 3 cartas');
   }
   /* Se duas escolhas caem juntas, a segunda espera a primeira. */
@@ -1490,7 +1628,7 @@ const AR = (() => {
    * opcoes.online = { eu: 0 ou 1 }; api.rede = { enviar(msg) } é o transporte; o que chega entra por api.receber(msg). */
   api.rede = null;
   const sorteio = semente => { let s = semente >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let x = Math.imul(s ^ (s >>> 15), 1 | s); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; };
-  const ACOES = ['jogar', 'usarPoder', 'atacar', 'bloquear', 'passar', 'fundir', 'comprarMercado', 'ofertar', 'usarBencao', 'escolherDescoberta', 'escolherEvento', 'responderMao', 'trocarMao', 'manterMao', 'escolherHeroi', 'responderAno'];
+  const ACOES = ['jogar', 'usarPoder', 'atacar', 'bloquear', 'passar', 'fundir', 'comprarMercado', 'ofertar', 'usarBencao', 'escolherDescoberta', 'escolherEvento', 'responderMao', 'trocarMao', 'manterMao', 'escolherHeroi', 'responderAno', 'tesouro'];
   const ser = v => {
     if (v == null || typeof v !== 'object') return v === undefined ? null : v;
     if (G.jog.includes(v)) return { P: v.i };

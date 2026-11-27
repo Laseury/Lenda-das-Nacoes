@@ -1,0 +1,31 @@
+{
+  "name": "Lendas das Nações",
+  "short_name": "Lendas",
+  "description": "Duelo de cartas: escolha uma nação, escreva a Saga dela e tome a Capital do rival.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#071419",
+  "theme_color": "#071419",
+  "icons": [
+    {
+      "src": "icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icone-mascara-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

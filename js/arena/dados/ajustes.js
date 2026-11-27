@@ -39,5 +39,5 @@ const AR_AJUSTES = {
   /* Nações */
   gingaMin: 2,          // Brasil: a Ginga dá +1 de Ataque quando atacam pelo menos esta quantidade de unidades
   tentaculoMax: 12,
-  solInicial: 10,       // Incas: o Sol (a Influência deles) começa aqui e cai 1 por rodada; ao chegar a 0, o Pachakuti volta a este valor     // Nórdicos: o quanto o Tentáculo pode crescer
+  solInicial: 20,       // Incas: o Sol começa aqui e cai 1 por rodada (e mais quando acelerado); ao chegar a 0, vem o Pachakuti e o deck vira o Panteão     // Nórdicos: o quanto o Tentáculo pode crescer
 };

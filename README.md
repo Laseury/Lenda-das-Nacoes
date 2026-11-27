@@ -177,7 +177,7 @@ Código em `js/arena/`: `motor.js` (`AR`, motor síncrono por ações), `ia.js` 
 - Mão inicial: dá para devolver tudo e comprar 1 a menos, até ficar com 3. Oferenda: 1 vez por rodada, 1 carta da mão vira Influência (até o teto).
 - Heróis: até 2 por deck (`arHeroi({ niveis, assinatura, missao, facil })`, 3 níveis, XP em campo, Assinatura no nível 3; ficam no deck e chegam pela compra normal, com o Chamado desligado em `ajustes.js`).
 - Mercado Mundial, Eventos Mundiais, Pilha, Segredos e Contínuas. A Fusão foi retirada (`fusao: false` em `ajustes.js`).
-- Treze decks: Brasil (Ginga), Japão (Evolução), Espanha (Palos), Grécia (Trabalhos), Nórdicos (Agitar), Portugal (Descobrir), Pangeia (Clima), Irlanda (Campeão), China (Ano do Animal), Rússia (Gelo), Velho Oeste (Recompensa), Incas (Sol regressivo) e Transilvânia (Dia e Noite).
+- Catorze decks: Brasil (Ginga), Japão (Evolução), Espanha (Palos), Grécia (Trabalhos), Nórdicos (Agitar), Portugal (Descobrir), Pangeia (Clima), Irlanda (Campeão), China (Ano do Animal), Rússia (Gelo), Velho Oeste (Recompensa), Incas (Sol regressivo), Transilvânia (Dia e Noite) e Roma (Expansão e Captura).
 
 ### Online da Arena
 

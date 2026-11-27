@@ -92,6 +92,7 @@ const arMissao = {
   ataque: (n, vira) => ({ n, acao: 'Atacar com ele', vira, conta: (u, tipo, d) => tipo === 'ataque' && d.atacantes.includes(u) }),
   ano: (n, vira) => ({ n, acao: 'O ano mudar', vira, conta: (u, tipo) => tipo === 'ano' }),
   sol: (n, vira) => ({ n, acao: 'Acelerar o Sol', vira, conta: (u, tipo, d) => tipo === 'sol' && d.p.i === u.dono && d.acelerou }),
+  captura: (n, vira) => ({ n, acao: 'Capturar algo do rival', vira, conta: (u, tipo, d) => tipo === 'captura' && d.p.i === u.dono }),
   recompensa: (n, vira) => ({ n, acao: 'Cobrar uma Recompensa', vira, conta: (u, tipo, d) => tipo === 'recompensa' && d.p.i === u.dono }),
 };
 

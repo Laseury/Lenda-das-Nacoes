@@ -264,8 +264,8 @@ const AR_IA = (() => {
       paz: () => (ataco ? 0 : Math.max(0, dele.length - 2) * 1.8), tempestade: () => p.mao.filter(c => c.d.tipo === 'tatica').length * .8 + dele.filter(u => temKw(u, 'elusivo')).length * 1.5,
       feira: () => 2.2 + Math.min(p.mao.length, 10) * -.1, ouro: () => 2.8, festival: () => (p.lider.usado === G.rodada ? 1.2 : 2.2), renascimento: () => 1 + (20 - p.capital) * .1,
       inverno: () => dele.reduce((n, u) => n + (atk(u) <= 1 ? 4 : 1.1), 0) + meus.length * .5,
-      peste: () => dele.reduce((n, u) => n + (vida(u) <= 1 ? 3.5 : .9), 0) + meus.filter(u => u.dano).length * .6,
-      eclipse: () => Math.max(1, 5 - p.mao.length) * 1.2 + 2,
+      peste: () => (dele.length - meus.length) * .8 + 1,
+      eclipse: () => 2 * 1.2 + 2,
     };
     return ids.slice().sort((a, b) => (N[b]() + falta(AR_MUNDO[b].clima)) - (N[a]() + falta(AR_MUNDO[a].clima)))[0];
   };
@@ -615,12 +615,21 @@ const AR_IA = (() => {
   }
   ia.raciocinar = raciocinar;
   /* Faz uma ação na hora (sem dividir o tempo). nivel: ver NIVEIS. */
+  /* Roma: carta Romanizada que não dá para jogar agora (ou não cabe) vira Influência e Província no Tesouro. */
+  function vaiTesouro(p) {
+    const G = AR.estado();
+    if (!AR.tesouro || G.fase !== 'acao' || G.pilha.length || G.vez !== p.i) return false;
+    const c = cartaTesouro(p);
+    return !!c && AR.tesouro(p, c);
+  }
+  function cartaTesouro(p) { return p.mao.find(c => c.romanizada && !AR.podeJogar(p, c) && (p.mao.length >= 4 || AR.custo(p, c) > p.maxInf + 1 || ((c.d.tipo === 'segredo' || c.d.tipo === 'continua') && !AR.cabeReliquia(p, c)))); }
   ia.agir = (p, nivel = ia.nivel) => {
     const G = AR.estado();
     if (!G || G.vencedor !== null || G.vez !== p.i) return false;
     const cfg = typeof nivel === 'object' ? nivel : NIVEIS[nivel];
     if (!cfg) return instinto(p);
     if (golpeFinal(p)) return true;
+    if (vaiTesouro(p)) return true;
     const it = raciocinar(p, cfg);
     let x = it.next();
     while (!x.done) x = it.next();
@@ -633,7 +642,8 @@ const AR_IA = (() => {
     const cfg = NIVEIS[nivel];
     let vivo = true;
     const ctl = { cancelar: () => { vivo = false; } };
-    if (!cfg || p.campo.some(x => x.d.venceAoAtacar)) { pronto(() => golpeFinal(p) || instinto(p)); return ctl; }
+    if (!cfg || p.campo.some(x => x.d.venceAoAtacar)) { pronto(() => golpeFinal(p) || vaiTesouro(p) || instinto(p)); return ctl; }
+    if (AR.tesouro && G.fase === 'acao' && !G.pilha.length && cartaTesouro(p)) { pronto(() => vaiTesouro(p) || instinto(p)); return ctl; }
     const it = raciocinar(p, cfg);
     const marca = G.log.length;
     const fatia = () => {

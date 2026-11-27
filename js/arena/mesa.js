@@ -29,6 +29,7 @@ const AR_MESA = (() => {
     ES: `<rect width="30" height="21" ${f('--es-1')}/><rect y="5.25" width="30" height="10.5" ${f('--es-2')}/>`,
     CN: `<rect width="30" height="21" ${f('--cn-1')}/><path d="M6 2.4l1 2.9h3l-2.4 1.8.9 2.9L6 8.200 3.500 10l.9-2.900L2 5.300h3Z" ${f('--cn-2')}/><circle cx="12" cy="2.600" r=".8" ${f('--cn-2')}/><circle cx="14" cy="5" r=".8" ${f('--cn-2')}/><circle cx="14" cy="8" r=".8" ${f('--cn-2')}/><circle cx="12" cy="10.500" r=".8" ${f('--cn-2')}/>`,
     OE: `<rect width="30" height="21" ${f('--oe-1')}/><rect y="15" width="30" height="6" ${f('--oe-3')}/><path d="M15 3.2l1.5 3.9 4.2.2-3.3 2.6 1.1 4-3.5-2.3-3.5 2.3 1.1-4-3.3-2.6 4.2-.2z" ${f('--oe-2')}/>`,
+    RM: `<rect width="30" height="21" ${f('--rm-1')}/><rect y="17" width="30" height="4" ${f('--rm-3')}/><path d="M15 4.2c-1 1.3-2.7 1.8-5 1.4 1 1.1 2.2 1.6 3.4 1.6-.9.6-1.4 1.5-1.4 2.6l1.6-.8.4 3.2-1.8 1.4h5.6l-1.8-1.4.4-3.2 1.6.8c0-1.1-.5-2-1.4-2.6 1.2 0 2.4-.5 3.4-1.6-2.3.4-4 0-5-1.4z" ${f('--rm-2')}/>`,
     PE: `<rect width="30" height="21" ${f('--pe-2')}/><rect width="10" height="21" ${f('--pe-1')}/><rect x="20" width="10" height="21" ${f('--pe-1')}/><circle cx="15" cy="10.5" r="3.2" ${f('--pe-3')}/><path d="M15 4.6v1.6M15 14.8v1.6M9.1 10.5h1.6M19.3 10.5h1.6M10.8 6.3l1.1 1.1M18.1 13.6l1.1 1.1M19.2 6.3l-1.1 1.1M11.9 13.6l-1.1 1.1" stroke="var(--pe-3)" stroke-width="1.1" stroke-linecap="round"/>`,
     TR: `<rect width="10" height="21" ${f('--tr-1')}/><rect x="10" width="10" height="21" ${f('--tr-2')}/><rect x="20" width="10" height="21" ${f('--tr-3')}/><path d="M15 8.6c-.8-1.2-2.4-1.7-4.6-1.2 1 .6 1.3 1.5 1 2.4-.9-.5-2-.4-2.6.4 1.6.1 2.9.9 3.5 2.2.8-.9 1.9-1 2.7-.5.8-.5 1.9-.4 2.7.5.6-1.3 1.9-2.1 3.5-2.2-.6-.8-1.7-.9-2.6-.4-.3-.9 0-1.8 1-2.4-2.2-.5-3.8 0-4.6 1.2z" fill="#1b1b22"/>`,
     RU: `<rect width="30" height="7" ${f('--ru-1')}/><rect y="7" width="30" height="7" ${f('--ru-2')}/><rect y="14" width="30" height="7" ${f('--ru-3')}/>`,
@@ -108,9 +109,9 @@ const AR_MESA = (() => {
     const mostraTexto = tam !== 'campo';
     const texto = textoCarta(d);
     const ev = u && d.tipo === 'unidade' && G() ? (AR.sofre(G().jog[u.dono], 'inverno') ? '<span class="ar-evento-selo ruim" title="Inverno Rigoroso">❄️−1⚔</span>' : AR.bencao(G().jog[u.dono], 'inverno') ? '<span class="ar-evento-selo bom" title="Inverno Rigoroso: bênção de Pangeia">❄️+1❤</span>' : AR.mundo() === 'ventos' && AR.emAtaque(u) ? `<span class="ar-evento-selo bom">🌪️+${AR.bencao(G().jog[u.dono], 'ventos') ? 2 : 1}⚔</span>` : '') : '';
-    const est = u ? [G() && G().pilha.some(it => it.alvo === u && it.p !== u.dono) ? 'mirado' : '', AR.dorme(u) ? 'dorme' : '', u.atordoado ? 'atordoado' : '', AR.congelada(u) ? 'congelada' : '', AR.temKw(u, 'barreira') ? 'com-barreira' : ''].join(' ') : '';
+    const est = u ? [u.romanizada ? 'romanizada' : '', u.infectado ? 'infectado' : '', G() && G().pilha.some(it => it.alvo === u && it.p !== u.dono) ? 'mirado' : '', AR.dorme(u) ? 'dorme' : '', u.atordoado ? 'atordoado' : '', AR.congelada(u) ? 'congelada' : '', AR.temKw(u, 'barreira') ? 'com-barreira' : ''].join(' ') : '';
     const selo = prev ? `<span class="ar-prev ${prev}">${prev === 'morre' ? '💀' : '✔'}</span>` : '';
-    return `<div class="ar-carta tam-${tam} n-${d.nacao} k-${d.tipo} ${d.ficha ? 'ficha' : ''} ${d.campeao ? 'campeao' : ''} ${d.heroi ? `e-heroi n${nivelHeroi(d, u)}` : ''} ${d.assinatura ? 'e-assinatura' : ''} ${u && AR.doAno(u) ? 'do-ano' : ''} ${u && AR.gaeAtiva(u) ? 'heroi' : ''} ${est} ${prev === 'morre' ? 'vai-morrer' : ''} ${classes}" data-uid="${c.uid}">
+    return `<div class="ar-carta tam-${tam} n-${d.nacao} k-${d.tipo} ${!u && c.romanizada ? 'romanizada' : ''} ${d.ficha ? 'ficha' : ''} ${d.campeao ? 'campeao' : ''} ${d.heroi ? `e-heroi n${nivelHeroi(d, u)}` : ''} ${d.assinatura ? 'e-assinatura' : ''} ${u && AR.doAno(u) ? 'do-ano' : ''} ${u && AR.gaeAtiva(u) ? 'heroi' : ''} ${est} ${prev === 'morre' ? 'vai-morrer' : ''} ${classes}" data-uid="${c.uid}">
       ${custo}
       <div class="ar-arte ${foto ? 'com-foto' : ''}">${foto}<span class="ar-icone" aria-hidden="true">${d.icone}</span><span class="ar-tipo">${tipo}</span></div>
       <div class="ar-nome">${esc(d.nome)}</div>
@@ -134,6 +135,11 @@ const AR_MESA = (() => {
     [/Precipit/, '🌩 Precipitar', 'veja 3 Eventos Mundiais e escolha qual entra agora.'],
     [/Fix[ae]/, '📌 Fixar', 'a próxima troca natural de Evento não acontece.'],
     [/Ano|signo/, '☯ Ano do Animal', 'cada rodada é o ano de um signo; os Animais do ano ficam mais fortes e liberam a Bênção.'],
+    [/Romanizad|Província|Espólio|Tesouro/, '🦅 Roma', 'carta capturada é Romanizada (unidade entra com +2/+1; Tática ou Relíquia custa 1 a menos) e pode ir ao Tesouro (vira Influência e Província). Cada captura é 1 Província.'],
+    [/Tributo/, '🪙 Tributo', 'tira Influência do rival nesta rodada e dá para Roma.'],
+    [/Saque|Cativo/, '💰 Saque e Cativos', 'Saque toma uma Relíquia do rival; Cativos leva uma carta da mão dele. As duas viram Romanizadas.'],
+    [/Peste|infectad/, '🦠 Peste', 'a unidade infectada sofre 1 de dano no fim da rodada e passa a Peste para quem lutar com ela; qualquer cura a salva; se ela cair, a Capital do dono sofre 1.'],
+    [/Panteão|Pachakuti|Deus\./, '🌀 Pachakuti', 'quando o Sol dos Incas chega a 0, o resto do deck deles vira o Panteão: só deuses, cartas muito mais fortes.'],
     [/Noite|Dia\b/, '🌗 Dia e Noite', 'com a Transilvânia na mesa, a partida começa de Dia e vira a cada rodada; cartas podem trazer a Noite na hora.'],
     [/Cria da Noite|Mordida/, '🧛 Mordida', 'Vampiro da Transilvânia que derruba um inimigo à Noite e sobrevive traz uma Cria da Noite (1/1 Vampiro).'],
     [/Profecia/, '🔒 Profecia', 'a carta só pode ser jogada com o Sol dos Incas em N ou menos. O Sol começa em 10 e cai 1 por rodada.'],
@@ -309,6 +315,22 @@ const AR_MESA = (() => {
     if (ok) proximo();
   }
 
+  /* Toque (celular): a carta da mão abre grande com o efeito, e só entra no campo pelo botão. */
+  function abrirFoco(c) {
+    const elc = document.querySelector(`#ar-mao-eu [data-uid="${c.uid}"]`);
+    if (!elc) { clicarMao(c); return; }
+    let el = $('#ar-foco');
+    if (!el) { el = document.createElement('div'); el.id = 'ar-foco'; el.className = 'sobreposicao ar-foco'; document.body.appendChild(el); }
+    const p = eu(), pode = podeAgir() && (AR.podeJogar(p, c) || (E.modo && E.modo.tipo === 'oferenda'));
+    const verbo = c.d.tipo === 'unidade' ? (c.d.evolui ? 'Evoluir / jogar' : 'Invocar') : c.d.tipo === 'segredo' ? 'Preparar' : c.d.tipo === 'continua' ? 'Erguer' : 'Jogar';
+    el.innerHTML = `<div class="ar-foco-caixa">${conteudoZoom(elc)}<div class="ar-foco-botoes">
+        <button class="btn primario" data-foco="jogar" ${pode ? '' : 'disabled'}>${pode ? `▶ ${verbo}` : !podeAgir() ? 'Espere a sua vez' : AR.custo(p, c) > p.inf + (c.d.tipo === 'unidade' ? 0 : p.reserva) ? `Falta Influência (${AR.custo(p, c)})` : 'Não dá para jogar agora'}</button>
+        ${c.romanizada && podeAgir() && AR.estado().fase === 'acao' && !AR.estado().pilha.length ? `<button class="btn ouro" data-foco="tesouro">🪙 Tesouro (+${Math.max(1, Math.floor(c.d.custo / 2))} 💎, +1 🏛️)</button>` : ''}
+        <button class="btn" data-foco="fechar">Fechar</button></div></div>`;
+    el.dataset.uid = c.uid;
+    el.hidden = false;
+  }
+  function fecharFoco() { const el = $('#ar-foco'); if (el) el.hidden = true; }
   function clicarMao(c) {
     const p = eu();
     const elc = document.querySelector(`#ar-mao-eu [data-uid="${c.uid}"]`);
@@ -566,8 +588,9 @@ const AR_MESA = (() => {
       + '<div class="ar-contadores">' + chipsHeroi(p) + (AR_DECKS[p.deckId].saga === 'kraken' ? `<span class="ar-contador agitar" title="Agitado: o Tentáculo tem +${AR.crescimento(p)}/+${AR.crescimento(p)}">🐙 ${p.agitado}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'carnaval' ? `<span class="ar-contador batucada" title="Batucada: aliados que já atacaram">🥁 ${p.samba || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'zodiaco' ? `<span class="ar-contador zodiaco" title="Anos celebrados: ${esc(Object.values(AR_SIGNOS).map(x => x.nome + (p.zodiaco.has(x.id) ? ' ✔' : '')).join(', '))}">🐉 ${p.zodiaco.size}/12</span>` : '')
+      + (AR_DECKS[p.deckId].captura ? `<span class="ar-contador provincia" title="Províncias: tudo que Roma já capturou. A Saga fecha capítulos com 2, 3, 5 e 7.">🏛️ ${AR.provincias(p)}</span>` + (AR.vagasEspolio(p) || AR.espolios(p) ? `<span class="ar-contador espolio" title="Espólios: Relíquias capturadas em jogo / Vagas de Espólio abertas">🏺 ${AR.espolios(p)}/${AR.vagasEspolio(p)}</span>` : '') : '')
       + (AR_DECKS[p.deckId].ciclo ? `<span class="ar-contador sangue" title="Sangue: dano de Vampiros à Capital rival à Noite (+1 por Mordida). Faz a Saga avançar.">🩸 ${p.sangue || 0}</span>` : '')
-      + (AR.temSol(p) ? `<span class="ar-contador sol ${p.sol <= 3 ? 'baixo' : ''}" title="Sol de Inti: a Influência máxima dos Incas. Cai 1 por rodada; cartas com Profecia N só entram com o Sol em N ou menos. Em 0, Pachakuti: volta a ${AR_AJUSTES.solInicial}.">☀️ ${p.sol}</span>` : '')
+      + (AR.temSol(p) ? (p.deuses ? '<span class="ar-contador sol deuses" title="Era dos Deuses: o deck virou o Panteão (só deuses) até o fim da partida.">🌀 Deuses</span>' : `<span class="ar-contador sol ${p.sol <= 5 ? 'baixo' : ''}" title="Sol de Inti: começa em ${AR_AJUSTES.solInicial} e cai 1 por rodada (e mais quando acelerado). Em 0 vem o Pachakuti: o deck vira o Panteão, só deuses.">☀️ ${p.sol}</span>`) : '')
       + (AR_DECKS[p.deckId].saga === 'oeste' ? `<span class="ar-contador ouro" title="Recompensas cobradas: Procurados que caíram">💰 ${p.ouro || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'inverno' ? `<span class="ar-contador frio" title="Gelo que você já pôs nos inimigos">❄️ ${p.frio || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'eras' ? `<span class="ar-contador eras" title="Eras vividas: Guerra, Vida e Ruína (cada rodada que termina sob um Evento)">🔥${p.erasClima.guerra} 🌿${p.erasClima.vida} 🌑${p.erasClima.ruina}</span>` : '')
@@ -607,10 +630,11 @@ const AR_MESA = (() => {
   }
   function reliquias(p) {
     const meu = p.i === EU;
-    const slots = [...p.continuas.map(c => `<div class="ar-reliq-slot cont n-${c.d.nacao} ${temFoto(c.d.arte) ? 'com-foto' : ''}" ${bg(c.d.arte)} data-cont="${c.uid}" title="${esc(c.d.nome)}"><span class="ar-reliq-ico">${c.d.icone}</span><span class="ar-reliq-nome">${esc(c.d.nome)}</span></div>`),
-      ...p.segredos.map(c => meu ? `<div class="ar-reliq-slot seg meu ${temFoto(c.d.arte) ? 'com-foto' : ''}" ${bg(c.d.arte)} data-seg="${c.uid}" title="${esc(c.d.nome)}"><span class="ar-reliq-ico">${c.d.icone}</span><span class="ar-reliq-nome">🔒 ${esc(c.d.nome)}</span></div>` : '<div class="ar-reliq-slot seg"><span class="ar-reliq-ico">?</span><span class="ar-reliq-nome">Segredo</span></div>')];
-    while (slots.length < AR.RELIQUIAS_MAX) slots.push('<div class="ar-reliq-slot vazio"><span>🏛️</span></div>');
-    return `<span class="ar-reliq-rot">${meu && !E.assistindo ? 'Suas Relíquias' : 'Relíquias'} <b>${p.continuas.length + p.segredos.length}/${AR.RELIQUIAS_MAX}</b></span>${slots.join('')}`;
+    const slots = [...p.continuas.map(c => `<div class="ar-reliq-slot cont ${c.romanizada ? 'espolio' : ''} n-${c.d.nacao} ${temFoto(c.d.arte) ? 'com-foto' : ''}" ${bg(c.d.arte)} data-cont="${c.uid}" title="${esc(c.d.nome)}"><span class="ar-reliq-ico">${c.d.icone}</span><span class="ar-reliq-nome">${esc(c.d.nome)}</span></div>`),
+      ...p.segredos.map(c => meu ? `<div class="ar-reliq-slot seg meu ${c.romanizada ? 'espolio' : ''} ${temFoto(c.d.arte) ? 'com-foto' : ''}" ${bg(c.d.arte)} data-seg="${c.uid}" title="${esc(c.d.nome)}"><span class="ar-reliq-ico">${c.d.icone}</span><span class="ar-reliq-nome">🔒 ${esc(c.d.nome)}</span></div>` : '<div class="ar-reliq-slot seg"><span class="ar-reliq-ico">?</span><span class="ar-reliq-nome">Segredo</span></div>')];
+    const teto = AR.RELIQUIAS_MAX + AR.vagasEspolio(p);
+    while (slots.length < teto) slots.push(slots.length >= AR.RELIQUIAS_MAX ? '<div class="ar-reliq-slot vazio espolio" title="Vaga de Espólio: só para Relíquias capturadas"><span>🏺</span></div>' : '<div class="ar-reliq-slot vazio"><span>🏛️</span></div>');
+    return `<span class="ar-reliq-rot">${meu && !E.assistindo ? 'Suas Relíquias' : 'Relíquias'} <b>${p.continuas.length + p.segredos.length}/${teto}</b></span>${slots.join('')}`;
   }
   function capital(p) {
     return `<span class="ar-cap-gema">${p.capital}</span><small>${E.assistindo ? p.nome : p.i === EU ? 'Sua Capital' : 'Capital CPU'}</small>`;
@@ -694,6 +718,7 @@ const AR_MESA = (() => {
     E.replay = { k: 0, tocando: false, vel: 1, ver: false, real: G() };
     E.leituras = []; E.lerNovas = []; E.cines = []; E.fx = []; E.marcas = []; E.fantasmas = []; E.projeteis = []; E.estilhacos = []; E.voo = null; E.jogada = null; E.banner = null; E.tremor = null;
     limparModo(); E.mercadoAberto = false;
+    fecharFoco();
     for (const id of ['#ar-fim', '#ar-cine', '#ar-jogada', '#ar-banner', '#ar-leitura']) { const el = $(id); if (el) el.hidden = true; }
     $('#ar-jogo').classList.add('replay');
     irQuadro(0);
@@ -757,7 +782,7 @@ const AR_MESA = (() => {
     if (E.ataque && (g.fase !== 'acao' || !AR.podeAtacar(eu()))) E.ataque = null;
     $('#ar-lider-cpu').innerHTML = liderZona(cpu()) + `<span class="ar-pilha-mini" title="${rv('Cartas no deck e na mão da CPU')}">🂠 ${cpu().deck.length} · ✋ ${cpu().mao.length}</span>`;
     $('#ar-lider-eu').innerHTML = liderZona(eu());
-    $('#ar-pilha-eu').innerHTML = `<span class="ar-pilha-deck" title="Cartas no seu deck"><b>${eu().deck.length}</b></span><small>Deck</small>`;
+    $('#ar-pilha-eu').innerHTML = `<span class="ar-pilha-deck ${eu().deuses ? 'deuses' : ''}" title="${eu().deuses ? 'O Panteão: seu deck agora só tem deuses' : 'Cartas no seu deck'}"><b>${eu().deck.length}</b></span><small>Deck</small>`;
     $('#ar-capital-1').innerHTML = rv(capital(cpu()));
     $('#ar-capital-0').innerHTML = capital(eu());
     $('#ar-capital-1').classList.toggle('perigo', cpu().capital <= 6);
@@ -782,11 +807,11 @@ const AR_MESA = (() => {
     $('#ar-tab').dataset.mundo = g.mundo ? g.mundo.id : '';
     /* luz nas bordas: azul na sua vez (embaixo), vermelha na vez do rival (em cima); as duas na troca de mão */
     const quem = g.vencedor !== null ? null : g.pendente ? (g.pendente.tipo === 'troca' && (g.pendente.quem || []).length > 1 ? 'ambos' : g.pendente.p) : g.vez;
-    $('#ar-tab').dataset.ciclo = g.ciclo ? (g.noite ? 'noite' : 'dia') : '';
+    $('#ar-tab').dataset.ciclo = g.ciclo ? (g.noite ? 'noite' : 'dia') : g.mundo && g.mundo.id === 'eclipse' ? 'noite' : '';
     $('#ar-tab').dataset.vez = quem == null ? '' : quem === 'ambos' ? 'ambos' : lugar(quem) === 0 && !E.assistindo ? 'eu' : 'cpu';
     $('#ar-rodada-info').innerHTML = `${g.ciclo ? `<span class="ar-ciclo-chip ${g.noite ? 'noite' : 'dia'}" title="${g.noiteEterna ? 'Noite Eterna: não amanhece mais.' : 'Dia e Noite: vira a cada rodada. De Dia os Vampiros dormem; à Noite batem mais forte e drenam.'}">${g.noite ? (g.noiteEterna ? '🌕 Noite Eterna' : '🌙 Noite') : '☀️ Dia'}</span>` : ''}${g.mundo ? `<span class="ar-mundo-chip" data-mundo="1" title="${esc(g.mundo.texto)}">${g.mundo.clima ? AR_CLIMAS[g.mundo.clima].icone : ''} ${g.mundo.icone} ${esc(g.mundo.nome)} <small>até R${g.mundoAte - 1}${g.mundoFixo ? ' 📌' : ''}</small></span>` : ''}Rodada <b>${g.rodada}</b> · ${{ acao: 'Ações', bloqueio: 'Defesa', janela: 'Combate' }[g.fase] || ''} · ${E.assistindo ? `<b class="ar-vez ${g.vez === EU ? '' : 'cpu'}">Vez: ${g.jog[g.vez].nome}</b>` : g.vez === EU ? '<b class="ar-vez">Sua vez</b>' : `<b class="ar-vez cpu">${rv('Vez da CPU')}</b>`}`;
     /* cartas que vieram de efeito ou do Mercado (c.publica) ficam à mostra; as compradas do deck, viradas */
-    $('#ar-mao-cpu').innerHTML = cpu().mao.map(c => E.assistindo || (E.replay && E.replay.ver) || c.publica ? `<div class="ar-verso aberta ${c.publica ? 'publica' : ''} n-${c.d.nacao}" ${bg(c.d.arte)} data-vista="${c.uid}" title="${esc(c.d.nome)}${c.publica ? ' (à mostra: veio de um efeito ou do Mercado)' : ''}"><b>${AR.custo(cpu(), c)}</b><span>${c.d.icone}</span></div>` : '<div class="ar-verso"></div>').join('');
+    $('#ar-mao-cpu').innerHTML = cpu().mao.map(c => E.assistindo || (E.replay && E.replay.ver) || c.publica ? `<div class="ar-verso aberta ${c.publica ? 'publica' : ''} n-${c.d.nacao}" ${bg(c.d.arte)} data-vista="${c.uid}" title="${esc(c.d.nome)}${c.publica ? ' (à mostra: veio de um efeito ou do Mercado)' : ''}"><b>${AR.custo(cpu(), c)}</b><span>${c.d.icone}</span>${c.d.estilhaco ? `<i class="ar-verso-val" title="Estilhaço: ${c.d.valor || 1} de dano">💥${c.d.valor || 1}</i>` : ''}</div>` : '<div class="ar-verso"></div>').join('');
     /* o Campeão ganhou um retrato novo */
     for (const u of AR.todas()) if (u.d.artes) { const a = arteDe(u, u.d), k = 'fase' + u.dono; if (E[k] && E[k].g === g && E[k].a !== a) E.marcas.push({ uid: u.uid, cls: 'ar-evolui' }); E[k] = { g, a }; }
     ceu(g);
@@ -937,6 +962,12 @@ const AR_MESA = (() => {
       case 'estilhaco': hRes(`🧊 Estilhaço de Gelo na mão de ${quemE(d.p.i)} (${d.n})`, 'gelo'); break;
       case 'voltar': hRes(`↩ ${d.u.d.nome} voltou à mão`, ''); break;
       case 'barreira': hRes(`🛡 Barreira de ${d.u.d.nome} anulou`, 'bloq'); break;
+      case 'captura': hRes(`🦅 ${quemE(d.p.i)} capturou ${d.c.d.tipo === 'segredo' && d.p.i !== EU ? 'um Segredo' : d.c.d.nome}`, 'pos'); break;
+      case 'saque': hRes(`💰 Saque: ${d.c.d.tipo === 'segredo' && d.p.i !== EU ? 'um Segredo' : d.c.d.nome} mudou de lado`, 'pos'); break;
+      case 'tributo': hRes(`🪙 Tributo: ${quemE(d.p.i)} recebe ${d.n} de Influência`, 'pos'); break;
+      case 'tesouro': hRes(`🏛️ ${d.c.d.nome} foi ao Tesouro (+${d.n} 💎)`, 'pos'); break;
+      case 'infectar': hRes(`🦠 ${d.u.d.nome} pegou a Peste`, 'neg'); break;
+      case 'curaPeste': hRes(`💚 ${d.u.d.nome} se curou da Peste`, 'pos'); break;
       case 'ciclo': hRes(d.noite ? '🌙 Caiu a Noite' : '☀️ Amanheceu', ''); break;
       case 'mordida': hRes(`🧛 Mordida: ${d.u.d.nome} vira Cria da Noite`, 'morte'); break;
       case 'sol': if (d.virou) hRes(`🌀 Pachakuti: o Sol de ${quemE(d.p.i)} volta a ☀️${d.p.sol}`, 'pos'); else if (d.acelerou) hRes(`☀️ Sol acelerado −${d.n} (agora ${d.p.sol})`, 'pos'); break;
@@ -1054,7 +1085,11 @@ const AR_MESA = (() => {
   }
   function ouvir(tipo, d) {
     historia(tipo, d);
-    if (tipo === 'mira') { E.fx.push({ uid: d.u.uid, txt: `🎯 ${d.nome}`, cls: 'mira' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-mira-pisca' }); }
+    if (tipo === 'captura' || tipo === 'saque') { if (!E.banner) E.banner = { txt: tipo === 'saque' ? '💰 Saque' : '🦅 Captura', sub: `${d.c.d.tipo === 'segredo' && d.p.i !== EU ? 'um Segredo' : d.c.d.nome} agora é de ${E.assistindo ? d.p.nome : d.p.i === EU ? 'Roma (você)' : 'Roma (CPU)'}`, cls: 'pequeno roma' }; }
+    else if (tipo === 'tributo') toast(`🪙 Tributo: ${d.p.i === EU ? 'você recebe' : 'a CPU toma'} ${d.n} de Influência`);
+    else if (tipo === 'infectar') { E.fx.push({ uid: d.u.uid, txt: '🦠 Peste', cls: 'neg' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-golpeado' }); }
+    else if (tipo === 'curaPeste') E.fx.push({ uid: d.u.uid, txt: '💚 Curada', cls: 'pos' });
+    else if (tipo === 'mira') { E.fx.push({ uid: d.u.uid, txt: `🎯 ${d.nome}`, cls: 'mira' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-mira-pisca' }); }
     else if (tipo === 'dano') { E.fx.push({ uid: d.u.uid, txt: `−${d.n}`, cls: 'neg' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-golpeado' }); }
     else if (tipo === 'capital') { if (d.n <= -4) E.tremor = d.n <= -7 ? 'forte' : 'leve'; E.fx.push({ cap: d.p.i, txt: `${d.n > 0 ? '+' : '−'}${Math.abs(d.n)}`, cls: d.n > 0 ? 'pos' : 'neg grande' }); E.marcas.push({ cap: d.p.i, cls: d.n > 0 ? 'ar-cura' : 'ar-treme' }); }
     else if (tipo === 'buff') { E.fx.push({ uid: d.u.uid, txt: `${d.a >= 0 ? '+' : ''}${d.a}/${d.v >= 0 ? '+' : ''}${d.v}`, cls: 'pos' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-buffado' }); }
@@ -1066,6 +1101,8 @@ const AR_MESA = (() => {
     else if (tipo === 'gelo') { E.fx.push({ uid: d.u.uid, txt: `❄️+${d.n}`, cls: 'gelo' }); E.marcas.push({ uid: d.u.uid, cls: d.congelou ? 'ar-congela' : 'ar-gelado' }); }
     else if (tipo === 'zodiaco') toast(`${AR_SIGNOS[d.signo].icone} ${nomeDe(d.p) === 'A CPU' && d.p.i === EU ? 'Você celebra' : d.p.i === EU && !E.assistindo ? 'Você celebra' : nomeDe(d.p) + ' celebra'} o ano ${AR_SIGNOS[d.signo].artigo} ${AR_SIGNOS[d.signo].nome} (${d.n}/12)`);
     else if (tipo === 'ano') { const S = AR_SIGNOS[d.id]; E.banner = { txt: `${S.icone} Ano ${S.artigo} ${S.nome}`, sub: S.texto, cls: 'ano' }; for (const u of AR.todas()) if (AR.doAno(u)) E.marcas.push({ uid: u.uid, cls: 'ar-buffado' }); }
+    else if (tipo === 'sol' && d.virou) { E.banner = { txt: '🌀 Pachakuti', sub: E.assistindo || d.p.i !== EU ? 'o deck rival virou o Panteão dos deuses' : 'seu deck virou o Panteão: só deuses!', cls: 'ouro' }; E.tremor = 'forte'; }
+    else if (tipo === 'ciclo') { E.ciclo = d.noite ? 'noite' : 'dia'; E.banner = d.noite ? { txt: '🌙 Cai a Noite', sub: 'Os Vampiros acordam: +1 de Ataque e Drenar', cls: 'noite' } : { txt: '☀️ Amanhece', sub: 'Os Vampiros dormem; os Servos ganham +1/+1', cls: 'dia' }; }
     else if (tipo === 'bencao') { E.marcas.push({ uid: d.u.uid, cls: 'ar-evolui' }); E.banner = { txt: `☯ ${d.u.d.bencao.nome}`, sub: `${d.u.d.nome}: ${d.u.d.bencao.texto}`, cls: 'pequeno' }; }
     else if (tipo === 'chamado') { if (d.p.i === EU && !E.assistindo) E.banner = { txt: '⭐ Chamado do Herói', sub: `${d.c.d.nome} atende ao chamado`, cls: 'ouro' }; else toast(`${nomeDe(d.p)} chamou um Herói para a mão.`); }
     else if (tipo === 'heroi') { E.cines.push({ tipo: 'heroi', p: d.p, base: d.base, nivel: d.nivel }); E.tremor = 'leve'; }
@@ -1232,6 +1269,17 @@ const AR_MESA = (() => {
       E.jogada = null;
     }
     tocarCine();
+    if (E.ciclo) {
+      const gr = $('.ar-gramado');
+      if (gr) {
+        const a = document.createElement('div');
+        a.className = `ar-ciclo-anim ${E.ciclo}`;
+        a.innerHTML = `<i class="ar-ciclo-astro">${E.ciclo === 'noite' ? '🌕' : '☀️'}</i>`;
+        gr.appendChild(a);
+        setTimeout(() => a.remove(), 2600);
+      }
+      E.ciclo = null;
+    }
     if (E.banner) {
       const b = $('#ar-banner');
       b.innerHTML = rv(`${esc(E.banner.txt)}${E.banner.sub ? `<small>${esc(E.banner.sub)}</small>` : ''}`);
@@ -1719,6 +1767,14 @@ const AR_MESA = (() => {
       if (e.target.closest('[data-ar="regras"], [data-ar="ajuda"]') || e.target.id === 'ar-ajuda') { const a = $('#ar-ajuda'); if (a.hidden) abrirAjuda(); else a.hidden = true; return; }
       if (e.target.closest('[data-ir]')) { if (ON.sala) sairSala(''); parar(); AR.encerrar(); document.body.classList.remove('ar-em-jogo'); return; }
       if (document.body.dataset.tela !== 'arena') return;
+      const fo = e.target.closest('#ar-foco');
+      if (fo) {
+        const b = e.target.closest('[data-foco]');
+        if (b && b.dataset.foco === 'tesouro') { const c = G() && eu().mao.find(x => x.uid === +fo.dataset.uid); fecharFoco(); if (c) acao(() => AR.tesouro(eu(), c)); }
+        else if (b && b.dataset.foco === 'jogar') { const c = G() && eu().mao.find(x => x.uid === +fo.dataset.uid); fecharFoco(); if (c) clicarMao(c); }
+        else if (!b || b.dataset.foco === 'fechar' || e.target === fo) fecharFoco();
+        return;
+      }
       if (!temMouse()) esconderZoom();
       const mp = e.target.closest('#ar-mapa [data-mapa]');
       if (mp) { escolherPais(mp.dataset.mapa); return; }
@@ -1778,14 +1834,15 @@ const AR_MESA = (() => {
         return;
       }
       if (!G() || $('#ar-jogo').hidden) return;
-      const li = e.target.closest('#ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist], #ar-ajuda [data-id]');
+      const li = e.target.closest('#ar-tab [data-vista], #ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist], #ar-ajuda [data-id]');
       if (li) { mostrarZoom(li, !temMouse()); return; }
       const el = e.target.closest('#ar-tab [data-uid]');
       if (!el) return;
+      const id = +el.dataset.uid;
+      const naMao = !E.assistindo && !E.replay && eu().mao.find(c => c.uid === id);
+      if (naMao && (!temMouse() || naMao.romanizada) && !(E.modo && (E.modo.tipo === 'oferenda' || E.modo.c === naMao))) { abrirFoco(naMao); return; }
       if (!temMouse()) mostrarZoom(el, true);
       if (E.assistindo || E.replay) return;
-      const id = +el.dataset.uid;
-      const naMao = eu().mao.find(c => c.uid === id);
       if (naMao) { clicarMao(naMao); return; }
       const u = AR.acharUnidade(id);
       if (u) clicarUnidade(u);
