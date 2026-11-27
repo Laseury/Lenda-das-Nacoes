@@ -1398,7 +1398,7 @@ span.ar-mao-op { cursor: default; }
  * barra de cima fina, colunas laterais estreitas, Relíquias numa coluninha ao lado dos bancos e a mão
  * espiando por baixo (toque na carta para levantá-la inteira). */
 @media (max-height: 540px) and (min-width: 560px) {
-  .ar-tab { --tw: clamp(40px, calc((100dvh - 146px) / 4.5), 78px); --pe: 78px;
+  .ar-tab { --tw: clamp(44px, calc((100dvh - 146px) / 3.6), 86px); --pe: 78px;
     grid-template-columns: 96px minmax(0, 1fr) 84px; grid-template-rows: 34px minmax(0, 1fr) var(--pe);
     grid-template-areas: "topo topo topo" "esq gram dir" "baixo baixo baixo"; }
   /* desfaz o empilhado do celular em pé (abaixo de 760 de largura) */
@@ -1590,3 +1590,58 @@ span.ar-mao-op { cursor: default; }
 .btn.ouro { background: linear-gradient(160deg, #ffe08a, #c9871a); color: #2e1a00; border-color: #fff3c2; }
 .ar-palco.n-RM { background: radial-gradient(ellipse at 50% 100%, rgba(233, 195, 90, calc(.07 + var(--cap) * .05)), transparent 60%), linear-gradient(rgba(140, 28, 31, calc(.06 + var(--cap) * .04)), transparent); }
 .ar-palco.n-RM .ar-part { border-radius: 50%; background: radial-gradient(circle, #fff1cc, #e9c35a 60%, #8e1c1f); box-shadow: 0 0 8px #e9c35a; width: calc(4px * var(--s)); height: calc(4px * var(--s)); }
+
+/* celular deitado: na mão, arte mais baixa para o nome e as palavras-chave aparecerem */
+@media (max-height: 540px) and (min-width: 560px) {
+  .ar-mao .ar-carta.tam-mao .ar-arte { height: 30%; }
+  .ar-mao .ar-carta .ar-nome { font-size: calc(var(--w) * .135); padding-top: 3px; }
+  .ar-mao .ar-carta .ar-tipo { font-size: 7px; }
+  .ar-luta-cols { min-height: calc(var(--th) * 2 + 8px); }
+  .ar-fila { padding: 2px 8px; min-height: calc(var(--th) + 6px); }
+}
+/* ícone da tela cheia desenhado (aparece em qualquer celular) */
+[data-tela-cheia] svg { width: 55%; height: 55%; display: block; margin: auto; }
+.btn[data-tela-cheia] svg { width: 16px; height: 16px; }
+@media (max-height: 540px) and (min-width: 560px) {
+  /* durante o combate as unidades encolhem um pouco para a zona de luta caber entre os bancos */
+  .ar-gramado:has(.ar-luta.ativa) { --tw: clamp(38px, calc((100dvh - 146px) / 5), 66px); --th: calc(var(--tw) * 0.84); }
+}
+
+/* ═════════════ Influência: orbe de cristal ═════════════ */
+.ar-mana { gap: 6px; padding: 8px 10px 7px; border-radius: 18px; background: linear-gradient(180deg, rgba(14, 34, 56, .94), rgba(5, 13, 22, .94)); border: 1px solid rgba(120, 180, 255, .55); box-shadow: inset 0 0 18px rgba(60, 120, 220, .22), 0 6px 16px rgba(0, 0, 0, .45); }
+.ar-mana.cpu { border-color: rgba(255, 130, 110, .5); box-shadow: inset 0 0 18px rgba(200, 60, 50, .2), 0 6px 16px rgba(0, 0, 0, .45); }
+.ar-mana-orbe { --pct: 0; --cor: #7cc4ff; --brilho: rgba(90, 160, 255, .5); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 70px; height: 70px; border-radius: 50%;
+  background: conic-gradient(var(--cor) calc(var(--pct) * 1%), rgba(255, 255, 255, .09) 0); box-shadow: 0 0 16px var(--brilho); transition: background .4s; }
+.ar-mana.cpu .ar-mana-orbe { --cor: #ff9d88; --brilho: rgba(255, 110, 90, .4); }
+.ar-mana-orbe::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, #2c5788, #0c1a2c 72%); box-shadow: inset 0 3px 8px rgba(0, 0, 0, .65); }
+.ar-mana.cpu .ar-mana-orbe::before { background: radial-gradient(circle at 35% 28%, #7a2d26, #22090a 72%); }
+.ar-mana-orbe b, .ar-mana-orbe small { position: relative; line-height: 1; }
+.ar-mana-orbe b { font: 800 28px var(--f-num); color: #fff; text-shadow: 0 0 10px var(--brilho), 0 2px 3px #000; }
+.ar-mana-orbe small { font: 700 10px var(--f-num); letter-spacing: .06em; text-transform: uppercase; color: #a9cbff; margin-top: 1px; }
+.ar-mana.cpu .ar-mana-orbe small { color: #ffc1b4; }
+.ar-mana .ar-gemas { grid-template-columns: repeat(5, 9px); gap: 3px 4px; }
+.ar-mana .ar-gemas i { width: 8px; height: 8px; border-radius: 2px; }
+.ar-mana .ar-gemas i.cheia { background: linear-gradient(135deg, #bfe1ff, #4c8ff0); }
+.ar-mana.cpu .ar-gemas i.cheia { background: linear-gradient(135deg, #ffd0c6, #e0604a); box-shadow: 0 0 6px #e0604a; border-color: #ff9d88; }
+.ar-reserva { display: flex; gap: 4px; } .ar-reserva i { width: 7px; height: 7px; border-radius: 50%; transform: none; }
+.ar-reserva i.cheia { background: #d9b3ff; box-shadow: 0 0 6px #b57cff; border-color: #d9b3ff; }
+
+/* ═════════════ Ícones das palavras-chave ═════════════ */
+.tam-campo .ar-kws { top: 3px; left: 3px; right: 3px; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; gap: 2px; padding: 0; background: none; font-size: max(9px, calc(var(--tw) * .115)); }
+.tam-campo .ar-kws span { display: grid; place-items: center; width: max(15px, calc(var(--tw) * .2)); height: max(15px, calc(var(--tw) * .2)); border-radius: 50%; background: rgba(8, 14, 18, .85); box-shadow: 0 0 0 1px rgba(255, 228, 160, .6), 0 1px 3px rgba(0, 0, 0, .6); line-height: 1; }
+.tam-mao .ar-kws { font-size: 11px; gap: 2px 6px; }
+.tam-mao .ar-kws em { font-size: 9.5px; letter-spacing: .02em; }
+.tam-grande .ar-kws { font-size: 15px; }
+
+/* celular deitado: lateral direita mais larga, orbe menor, gemas escondidas (o orbe já mostra) */
+@media (max-height: 540px) and (min-width: 560px) {
+  .ar-tab { grid-template-columns: 96px minmax(0, 1fr) 100px; }
+  .ar-mana { padding: 4px 6px; gap: 3px; border-radius: 14px; width: 88px; }
+  .ar-mana-orbe { width: 50px; height: 50px; }
+  .ar-mana-orbe::before { inset: 4px; }
+  .ar-mana-orbe b { font-size: 20px; }
+  .ar-mana-orbe small { font-size: 8px; }
+  .ar-mana .ar-gemas { display: none; }
+  .ar-mao .ar-kws { font-size: 9px; } .ar-mao .ar-kws em { font-size: 8px; }
+  .tam-campo .ar-kws span { width: 14px; height: 14px; } .tam-campo .ar-kws { font-size: 8.5px; }
+}

@@ -643,7 +643,8 @@ const AR_MESA = (() => {
     const teto = Math.max(p.maxInf, p.infTeto || 0);
     const gemas = Array.from({ length: teto }, (_, k) => `<i class="${k < p.inf ? 'cheia' : 'gasta'} ${k >= p.maxInf ? 'extra' : ''}"></i>`).join('');
     const reserva = Array.from({ length: 3 }, (_, k) => `<i class="${k < p.reserva ? 'cheia' : ''}"></i>`).join('');
-    return `<div class="ar-mana-num" title="Influência: paga as cartas. Sobe 1 por rodada, até 10."><b>${p.inf}</b><span>/${Math.max(p.maxInf, p.infTeto || 0)}</span></div>
+    const pct = teto ? Math.round(100 * Math.min(p.inf, teto) / teto) : 0;
+    return `<div class="ar-mana-orbe" style="--pct:${pct}" title="Influência: paga as cartas. Sobe 1 por rodada, até 10."><b>${p.inf}</b><small>de ${teto}</small></div>
       <div class="ar-gemas">${gemas}</div>
       <div class="ar-reserva" title="Reserva: guarda até 3 de Influência que sobrou, só para Táticas">${reserva}</div>`;
   }
