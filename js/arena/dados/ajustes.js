@@ -25,6 +25,7 @@ const AR_AJUSTES = {
   fusao: false,         // Fusão de duas unidades: desligada (true volta a permitir)
   mercadoCartas: 3,     // cartas à venda por rodada
   mercadoPreco: 1,      // custo a mais de cada carta do Mercado
+  mercadoPorRodada: 1,  // quantas compras no Mercado cada jogador pode fazer por rodada
   mercadoMaoMax: 2,     // só compra no Mercado quem tem esta quantidade de cartas na mão, ou menos
   fusaoCusto: 4,        // Influência para fundir duas unidades
   fusaoMax: 9,          // teto de Ataque e de Vida de uma fusão
@@ -37,5 +38,6 @@ const AR_AJUSTES = {
 
   /* Nações */
   gingaMin: 2,          // Brasil: a Ginga dá +1 de Ataque quando atacam pelo menos esta quantidade de unidades
-  tentaculoMax: 12,     // Nórdicos: o quanto o Tentáculo pode crescer
+  tentaculoMax: 12,
+  solInicial: 10,       // Incas: o Sol (a Influência deles) começa aqui e cai 1 por rodada; ao chegar a 0, o Pachakuti volta a este valor     // Nórdicos: o quanto o Tentáculo pode crescer
 };

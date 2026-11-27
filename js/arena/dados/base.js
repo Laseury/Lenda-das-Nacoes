@@ -37,6 +37,8 @@ const AR_KW = {
   regenera: { nome: 'Regeneração', icone: '🌿', texto: 'No fim de cada rodada, cura todo o dano.' },
   furia: { nome: 'Fúria', icone: '😤', texto: 'Quando derruba um inimigo em combate e sobrevive, ganha +1/+1.' },
   lenda: { nome: 'Lenda', icone: '⭐', texto: 'Uma figura lendária: no máximo 6 Lendas por deck.' },
+  vampiro: { nome: 'Vampiro', icone: '🦇', texto: 'À Noite: +1 de Ataque e Drenar. De Dia dorme no caixão: não ataca nem bloqueia, mas o rival não pode escolhê-lo como alvo.' },
+  servo: { nome: 'Servo', icone: '🕯️', texto: 'Humano a serviço do Conde: de Dia tem +1/+1.' },
   procurado: { nome: 'Procurado', icone: '💰', texto: 'Tem a cabeça a prêmio: quando cair, o Velho Oeste cobra a Recompensa (+1 de Influência na hora e 1 carta).' },
 };
 
@@ -89,6 +91,7 @@ const arMissao = {
   congelar: (n, vira) => ({ n, acao: 'Pôr Gelo num inimigo', vira, conta: (u, tipo, d) => tipo === 'gelo' && d.p.i === u.dono }),
   ataque: (n, vira) => ({ n, acao: 'Atacar com ele', vira, conta: (u, tipo, d) => tipo === 'ataque' && d.atacantes.includes(u) }),
   ano: (n, vira) => ({ n, acao: 'O ano mudar', vira, conta: (u, tipo) => tipo === 'ano' }),
+  sol: (n, vira) => ({ n, acao: 'Acelerar o Sol', vira, conta: (u, tipo, d) => tipo === 'sol' && d.p.i === u.dono && d.acelerou }),
   recompensa: (n, vira) => ({ n, acao: 'Cobrar uma Recompensa', vira, conta: (u, tipo, d) => tipo === 'recompensa' && d.p.i === u.dono }),
 };
 

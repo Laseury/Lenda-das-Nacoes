@@ -29,6 +29,8 @@ const AR_MESA = (() => {
     ES: `<rect width="30" height="21" ${f('--es-1')}/><rect y="5.25" width="30" height="10.5" ${f('--es-2')}/>`,
     CN: `<rect width="30" height="21" ${f('--cn-1')}/><path d="M6 2.4l1 2.9h3l-2.4 1.8.9 2.9L6 8.200 3.500 10l.9-2.900L2 5.300h3Z" ${f('--cn-2')}/><circle cx="12" cy="2.600" r=".8" ${f('--cn-2')}/><circle cx="14" cy="5" r=".8" ${f('--cn-2')}/><circle cx="14" cy="8" r=".8" ${f('--cn-2')}/><circle cx="12" cy="10.500" r=".8" ${f('--cn-2')}/>`,
     OE: `<rect width="30" height="21" ${f('--oe-1')}/><rect y="15" width="30" height="6" ${f('--oe-3')}/><path d="M15 3.2l1.5 3.9 4.2.2-3.3 2.6 1.1 4-3.5-2.3-3.5 2.3 1.1-4-3.3-2.6 4.2-.2z" ${f('--oe-2')}/>`,
+    PE: `<rect width="30" height="21" ${f('--pe-2')}/><rect width="10" height="21" ${f('--pe-1')}/><rect x="20" width="10" height="21" ${f('--pe-1')}/><circle cx="15" cy="10.5" r="3.2" ${f('--pe-3')}/><path d="M15 4.6v1.6M15 14.8v1.6M9.1 10.5h1.6M19.3 10.5h1.6M10.8 6.3l1.1 1.1M18.1 13.6l1.1 1.1M19.2 6.3l-1.1 1.1M11.9 13.6l-1.1 1.1" stroke="var(--pe-3)" stroke-width="1.1" stroke-linecap="round"/>`,
+    TR: `<rect width="10" height="21" ${f('--tr-1')}/><rect x="10" width="10" height="21" ${f('--tr-2')}/><rect x="20" width="10" height="21" ${f('--tr-3')}/><path d="M15 8.6c-.8-1.2-2.4-1.7-4.6-1.2 1 .6 1.3 1.5 1 2.4-.9-.5-2-.4-2.6.4 1.6.1 2.9.9 3.5 2.2.8-.9 1.9-1 2.7-.5.8-.5 1.9-.4 2.7.5.6-1.3 1.9-2.1 3.5-2.2-.6-.8-1.7-.9-2.6-.4-.3-.9 0-1.8 1-2.4-2.2-.5-3.8 0-4.6 1.2z" fill="#1b1b22"/>`,
     RU: `<rect width="30" height="7" ${f('--ru-1')}/><rect y="7" width="30" height="7" ${f('--ru-2')}/><rect y="14" width="30" height="7" ${f('--ru-3')}/>`,
     IE: `<rect width="10" height="21" ${f('--ie-1')}/><rect x="10" width="10" height="21" ${f('--ie-2')}/><rect x="20" width="10" height="21" ${f('--ie-3')}/>`,
     GR: `<rect width="30" height="21" ${f('--gr-1')}/><rect y="2.33" width="30" height="2.33" ${f('--gr-2')}/><rect y="7" width="30" height="2.33" ${f('--gr-2')}/><rect y="11.67" width="30" height="2.33" ${f('--gr-2')}/><rect y="16.33" width="30" height="2.33" ${f('--gr-2')}/><rect width="11.67" height="11.67" ${f('--gr-1')}/><rect x="4.67" width="2.33" height="11.67" ${f('--gr-2')}/><rect y="4.67" width="11.67" height="2.33" ${f('--gr-2')}/>`,
@@ -90,6 +92,7 @@ const AR_MESA = (() => {
       const falta = naMao && !AR.podeJogar(p, c) && n > (d.tipo === 'tatica' || d.tipo === 'segredo' || d.tipo === 'continua' ? p.inf + p.reserva : p.inf);
       custo = `<span class="ar-custo ${falta ? 'falta' : ''}" title="Custo: ${n} de Influência">${n}</span>`;
     }
+    if (d.profecia) { const dono = G() ? G().jog[u ? u.dono : c.dono] : null; const ok = !dono || AR.profeciaOk(dono, c); custo += `<span class="ar-profecia ${ok ? 'aberta' : ''}" title="Profecia ${d.profecia}: só entra com o Sol em ${d.profecia} ou menos${dono && AR.temSol(dono) ? ` (agora ☀️${dono.sol})` : ''}">${ok ? '☀️' : '🔒'}${d.profecia}</span>`; }
     let pe = '';
     if (d.tipo === 'unidade') {
       const viva = u || previa(c);
@@ -105,7 +108,7 @@ const AR_MESA = (() => {
     const mostraTexto = tam !== 'campo';
     const texto = textoCarta(d);
     const ev = u && d.tipo === 'unidade' && G() ? (AR.sofre(G().jog[u.dono], 'inverno') ? '<span class="ar-evento-selo ruim" title="Inverno Rigoroso">❄️−1⚔</span>' : AR.bencao(G().jog[u.dono], 'inverno') ? '<span class="ar-evento-selo bom" title="Inverno Rigoroso: bênção de Pangeia">❄️+1❤</span>' : AR.mundo() === 'ventos' && AR.emAtaque(u) ? `<span class="ar-evento-selo bom">🌪️+${AR.bencao(G().jog[u.dono], 'ventos') ? 2 : 1}⚔</span>` : '') : '';
-    const est = u ? [u.atordoado ? 'atordoado' : '', AR.congelada(u) ? 'congelada' : '', AR.temKw(u, 'barreira') ? 'com-barreira' : ''].join(' ') : '';
+    const est = u ? [G() && G().pilha.some(it => it.alvo === u && it.p !== u.dono) ? 'mirado' : '', AR.dorme(u) ? 'dorme' : '', u.atordoado ? 'atordoado' : '', AR.congelada(u) ? 'congelada' : '', AR.temKw(u, 'barreira') ? 'com-barreira' : ''].join(' ') : '';
     const selo = prev ? `<span class="ar-prev ${prev}">${prev === 'morre' ? '💀' : '✔'}</span>` : '';
     return `<div class="ar-carta tam-${tam} n-${d.nacao} k-${d.tipo} ${d.ficha ? 'ficha' : ''} ${d.campeao ? 'campeao' : ''} ${d.heroi ? `e-heroi n${nivelHeroi(d, u)}` : ''} ${d.assinatura ? 'e-assinatura' : ''} ${u && AR.doAno(u) ? 'do-ano' : ''} ${u && AR.gaeAtiva(u) ? 'heroi' : ''} ${est} ${prev === 'morre' ? 'vai-morrer' : ''} ${classes}" data-uid="${c.uid}">
       ${custo}
@@ -131,6 +134,10 @@ const AR_MESA = (() => {
     [/Precipit/, '🌩 Precipitar', 'veja 3 Eventos Mundiais e escolha qual entra agora.'],
     [/Fix[ae]/, '📌 Fixar', 'a próxima troca natural de Evento não acontece.'],
     [/Ano|signo/, '☯ Ano do Animal', 'cada rodada é o ano de um signo; os Animais do ano ficam mais fortes e liberam a Bênção.'],
+    [/Noite|Dia\b/, '🌗 Dia e Noite', 'com a Transilvânia na mesa, a partida começa de Dia e vira a cada rodada; cartas podem trazer a Noite na hora.'],
+    [/Cria da Noite|Mordida/, '🧛 Mordida', 'Vampiro da Transilvânia que derruba um inimigo à Noite e sobrevive traz uma Cria da Noite (1/1 Vampiro).'],
+    [/Profecia/, '🔒 Profecia', 'a carta só pode ser jogada com o Sol dos Incas em N ou menos. O Sol começa em 10 e cai 1 por rodada.'],
+    [/Sol|Acelere/, '☀️ Sol de Inti', 'a Influência máxima dos Incas: começa em 10 e cai 1 por rodada. Acelerar faz o Sol cair na hora (a Influência da rodada fica). Em 0, Pachakuti: o Sol volta a 10.'],
     [/Procurad|Recompensa/, '💰 Procurado', 'a marca fica no inimigo até ele cair; quando cai, o Velho Oeste cobra a Recompensa: +1 de Influência na hora, 1 carta e um passo na Saga.'],
     [/Invoque|Ficha/, '✨ Invocar', 'a unidade nasce direto no seu banco (se houver espaço).'],
   ];
@@ -559,6 +566,8 @@ const AR_MESA = (() => {
       + '<div class="ar-contadores">' + chipsHeroi(p) + (AR_DECKS[p.deckId].saga === 'kraken' ? `<span class="ar-contador agitar" title="Agitado: o Tentáculo tem +${AR.crescimento(p)}/+${AR.crescimento(p)}">🐙 ${p.agitado}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'carnaval' ? `<span class="ar-contador batucada" title="Batucada: aliados que já atacaram">🥁 ${p.samba || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'zodiaco' ? `<span class="ar-contador zodiaco" title="Anos celebrados: ${esc(Object.values(AR_SIGNOS).map(x => x.nome + (p.zodiaco.has(x.id) ? ' ✔' : '')).join(', '))}">🐉 ${p.zodiaco.size}/12</span>` : '')
+      + (AR_DECKS[p.deckId].ciclo ? `<span class="ar-contador sangue" title="Sangue: dano de Vampiros à Capital rival à Noite (+1 por Mordida). Faz a Saga avançar.">🩸 ${p.sangue || 0}</span>` : '')
+      + (AR.temSol(p) ? `<span class="ar-contador sol ${p.sol <= 3 ? 'baixo' : ''}" title="Sol de Inti: a Influência máxima dos Incas. Cai 1 por rodada; cartas com Profecia N só entram com o Sol em N ou menos. Em 0, Pachakuti: volta a ${AR_AJUSTES.solInicial}.">☀️ ${p.sol}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'oeste' ? `<span class="ar-contador ouro" title="Recompensas cobradas: Procurados que caíram">💰 ${p.ouro || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'inverno' ? `<span class="ar-contador frio" title="Gelo que você já pôs nos inimigos">❄️ ${p.frio || 0}</span>` : '')
       + (AR_DECKS[p.deckId].saga === 'eras' ? `<span class="ar-contador eras" title="Eras vividas: Guerra, Vida e Ruína (cada rodada que termina sob um Evento)">🔥${p.erasClima.guerra} 🌿${p.erasClima.vida} 🌑${p.erasClima.ruina}</span>` : '')
@@ -773,9 +782,11 @@ const AR_MESA = (() => {
     $('#ar-tab').dataset.mundo = g.mundo ? g.mundo.id : '';
     /* luz nas bordas: azul na sua vez (embaixo), vermelha na vez do rival (em cima); as duas na troca de mão */
     const quem = g.vencedor !== null ? null : g.pendente ? (g.pendente.tipo === 'troca' && (g.pendente.quem || []).length > 1 ? 'ambos' : g.pendente.p) : g.vez;
+    $('#ar-tab').dataset.ciclo = g.ciclo ? (g.noite ? 'noite' : 'dia') : '';
     $('#ar-tab').dataset.vez = quem == null ? '' : quem === 'ambos' ? 'ambos' : lugar(quem) === 0 && !E.assistindo ? 'eu' : 'cpu';
-    $('#ar-rodada-info').innerHTML = `${g.mundo ? `<span class="ar-mundo-chip" data-mundo="1" title="${esc(g.mundo.texto)}">${g.mundo.clima ? AR_CLIMAS[g.mundo.clima].icone : ''} ${g.mundo.icone} ${esc(g.mundo.nome)} <small>até R${g.mundoAte - 1}${g.mundoFixo ? ' 📌' : ''}</small></span>` : ''}Rodada <b>${g.rodada}</b> · ${{ acao: 'Ações', bloqueio: 'Defesa', janela: 'Combate' }[g.fase] || ''} · ${E.assistindo ? `<b class="ar-vez ${g.vez === EU ? '' : 'cpu'}">Vez: ${g.jog[g.vez].nome}</b>` : g.vez === EU ? '<b class="ar-vez">Sua vez</b>' : `<b class="ar-vez cpu">${rv('Vez da CPU')}</b>`}`;
-    $('#ar-mao-cpu').innerHTML = cpu().mao.map(c => E.assistindo || (E.replay && E.replay.ver) ? `<div class="ar-verso aberta n-${c.d.nacao}" ${bg(c.d.arte)} title="${esc(c.d.nome)}"><b>${AR.custo(cpu(), c)}</b><span>${c.d.icone}</span></div>` : '<div class="ar-verso"></div>').join('');
+    $('#ar-rodada-info').innerHTML = `${g.ciclo ? `<span class="ar-ciclo-chip ${g.noite ? 'noite' : 'dia'}" title="${g.noiteEterna ? 'Noite Eterna: não amanhece mais.' : 'Dia e Noite: vira a cada rodada. De Dia os Vampiros dormem; à Noite batem mais forte e drenam.'}">${g.noite ? (g.noiteEterna ? '🌕 Noite Eterna' : '🌙 Noite') : '☀️ Dia'}</span>` : ''}${g.mundo ? `<span class="ar-mundo-chip" data-mundo="1" title="${esc(g.mundo.texto)}">${g.mundo.clima ? AR_CLIMAS[g.mundo.clima].icone : ''} ${g.mundo.icone} ${esc(g.mundo.nome)} <small>até R${g.mundoAte - 1}${g.mundoFixo ? ' 📌' : ''}</small></span>` : ''}Rodada <b>${g.rodada}</b> · ${{ acao: 'Ações', bloqueio: 'Defesa', janela: 'Combate' }[g.fase] || ''} · ${E.assistindo ? `<b class="ar-vez ${g.vez === EU ? '' : 'cpu'}">Vez: ${g.jog[g.vez].nome}</b>` : g.vez === EU ? '<b class="ar-vez">Sua vez</b>' : `<b class="ar-vez cpu">${rv('Vez da CPU')}</b>`}`;
+    /* cartas que vieram de efeito ou do Mercado (c.publica) ficam à mostra; as compradas do deck, viradas */
+    $('#ar-mao-cpu').innerHTML = cpu().mao.map(c => E.assistindo || (E.replay && E.replay.ver) || c.publica ? `<div class="ar-verso aberta ${c.publica ? 'publica' : ''} n-${c.d.nacao}" ${bg(c.d.arte)} data-vista="${c.uid}" title="${esc(c.d.nome)}${c.publica ? ' (à mostra: veio de um efeito ou do Mercado)' : ''}"><b>${AR.custo(cpu(), c)}</b><span>${c.d.icone}</span></div>` : '<div class="ar-verso"></div>').join('');
     /* o Campeão ganhou um retrato novo */
     for (const u of AR.todas()) if (u.d.artes) { const a = arteDe(u, u.d), k = 'fase' + u.dono; if (E[k] && E[k].g === g && E[k].a !== a) E.marcas.push({ uid: u.uid, cls: 'ar-evolui' }); E[k] = { g, a }; }
     ceu(g);
@@ -808,7 +819,7 @@ const AR_MESA = (() => {
     if (!E.mercadoAberto) { el.hidden = true; return; }
     const p = eu();
     el.innerHTML = `<div class="ar-mercado-topo com-foto"><strong>🏪 Mercado Mundial</strong><button class="ar-icone-btn" data-ar="mercado" title="Fechar">✕</button></div>
-      <p class="ar-mercado-txt">Cartas neutras à venda nesta rodada. ${AR.bencao(p, 'feira') ? 'Com a Grande Feira, para Pangeia é <b>de graça</b> e você compra <b>2 por rodada</b>:' : `Custa ${AR.MERCADO_PRECO} de Influência e você compra <b>1 por rodada</b>:`} a carta vai para a mão e depois é jogada pelo custo normal.</p>
+      <p class="ar-mercado-txt">Cartas neutras à venda nesta rodada. ${AR.bencao(p, 'feira') ? 'Com a Grande Feira, para Pangeia é <b>de graça</b> (1 compra por rodada):' : `Custa ${AR.MERCADO_PRECO} de Influência e você compra <b>1 por rodada</b>:`} a carta vai para a mão e depois é jogada pelo custo normal.</p>
       <p class="ar-mercado-req ${p.mao.length <= AR.MERCADO_MAO ? 'ok' : 'nao'}">✋ Requisito: estar com <b>${AR.MERCADO_MAO} cartas ou menos</b> na mão. Você tem ${p.mao.length}.${AR.motivoMercado(p) && p.mao.length <= AR.MERCADO_MAO ? ` ${esc(AR.motivoMercado(p))}` : ''}</p>
       <div class="ar-mercado-itens">${g.mercado.map((m, k) => `<div class="ar-mercado-item">${htmlCarta({ uid: 0, d: AR_CARTAS[m.id], dono: E.assistindo ? null : EU }, { tam: 'grande' })}<button class="btn primario" data-comprar="${k}" ${podeAgir() && AR.podeMercado(p, k) ? '' : 'disabled'}>${AR_DECKS[p.deckId].soCampeao && AR_CARTAS[m.id].tipo === 'unidade' ? 'Só Cú Chulainn luta' : p.mao.length > AR.MERCADO_MAO ? `✋ Mão com ${p.mao.length}` : `Comprar (💎${AR.precoMercado(p, k)})`}</button></div>`).join('') || '<p>O Mercado está vazio nesta rodada.</p>'}</div>`;
     el.hidden = false;
@@ -926,6 +937,9 @@ const AR_MESA = (() => {
       case 'estilhaco': hRes(`🧊 Estilhaço de Gelo na mão de ${quemE(d.p.i)} (${d.n})`, 'gelo'); break;
       case 'voltar': hRes(`↩ ${d.u.d.nome} voltou à mão`, ''); break;
       case 'barreira': hRes(`🛡 Barreira de ${d.u.d.nome} anulou`, 'bloq'); break;
+      case 'ciclo': hRes(d.noite ? '🌙 Caiu a Noite' : '☀️ Amanheceu', ''); break;
+      case 'mordida': hRes(`🧛 Mordida: ${d.u.d.nome} vira Cria da Noite`, 'morte'); break;
+      case 'sol': if (d.virou) hRes(`🌀 Pachakuti: o Sol de ${quemE(d.p.i)} volta a ☀️${d.p.sol}`, 'pos'); else if (d.acelerou) hRes(`☀️ Sol acelerado −${d.n} (agora ${d.p.sol})`, 'pos'); break;
       case 'recompensa': hRes(`💰 Recompensa por ${d.u.d.nome} (+1 💎, +1 carta)`, 'pos'); break;
       case 'ganhaBarreira': hRes(`🛡 ${d.u.d.nome} ganhou Barreira`, 'bloq'); break;
       case 'protege': hRes(d.tudo ? `🛡 ${capDe(d.p)} protegida` : `🛡 ${capDe(d.p)}: ${d.evitado} de dano evitado`, 'bloq'); break;
@@ -977,6 +991,7 @@ const AR_MESA = (() => {
     if (el.dataset.heroi) return htmlHeroi(el.dataset.heroi, el.dataset.dono != null && G() ? G().jog[+el.dataset.dono] : null);
     if (el.id === 'ar-roda' && G() && G().ano) return htmlRoda();
     if (el.dataset.saga != null && G()) return htmlSaga(G().jog[+el.dataset.saga]);
+    if (el.dataset.vista != null && G()) { const c = cpu().mao.find(x => x.uid === +el.dataset.vista); return c ? htmlCarta(c, { tam: 'grande' }) : ''; }
     if (el.dataset.seg != null && G()) { const c = eu().segredos.find(x => x.uid === +el.dataset.seg); return c ? htmlCarta(c, { tam: 'grande' }) : ''; }
     if (el.dataset.cont != null && G()) { const c = G().jog.flatMap(q => q.continuas).find(x => x.uid === +el.dataset.cont); return c ? htmlCarta(c, { tam: 'grande' }) : ''; }
     if (el.dataset.pilha != null && G()) { const it = G().pilha.find(x => x.id === +el.dataset.pilha); return it ? htmlItemPilha(it) : ''; }
@@ -1039,7 +1054,8 @@ const AR_MESA = (() => {
   }
   function ouvir(tipo, d) {
     historia(tipo, d);
-    if (tipo === 'dano') { E.fx.push({ uid: d.u.uid, txt: `−${d.n}`, cls: 'neg' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-golpeado' }); }
+    if (tipo === 'mira') { E.fx.push({ uid: d.u.uid, txt: `🎯 ${d.nome}`, cls: 'mira' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-mira-pisca' }); }
+    else if (tipo === 'dano') { E.fx.push({ uid: d.u.uid, txt: `−${d.n}`, cls: 'neg' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-golpeado' }); }
     else if (tipo === 'capital') { if (d.n <= -4) E.tremor = d.n <= -7 ? 'forte' : 'leve'; E.fx.push({ cap: d.p.i, txt: `${d.n > 0 ? '+' : '−'}${Math.abs(d.n)}`, cls: d.n > 0 ? 'pos' : 'neg grande' }); E.marcas.push({ cap: d.p.i, cls: d.n > 0 ? 'ar-cura' : 'ar-treme' }); }
     else if (tipo === 'buff') { E.fx.push({ uid: d.u.uid, txt: `${d.a >= 0 ? '+' : ''}${d.a}/${d.v >= 0 ? '+' : ''}${d.v}`, cls: 'pos' }); E.marcas.push({ uid: d.u.uid, cls: 'ar-buffado' }); }
     else if (tipo === 'barreira') { E.marcas.push({ uid: d.u.uid, cls: 'ar-escudo-quebra' }); E.fx.push({ uid: d.u.uid, txt: '🛡 Anulou!', cls: 'escudo' }); }
@@ -1776,7 +1792,7 @@ const AR_MESA = (() => {
     });
     document.addEventListener('mouseover', e => {
       if (document.body.dataset.tela !== 'arena' || !temMouse()) return;
-      const el = e.target.closest('#ar-tab [data-uid], #ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist], #ar-ajuda [data-id], #ar-decks [data-id], #ar-decks [data-heroi], #ar-decks [data-saga-id]');
+      const el = e.target.closest('#ar-tab [data-vista], #ar-tab [data-uid], #ar-tab [data-lider], #ar-tab [data-saga], #ar-tab [data-seg], #ar-tab [data-cont], #ar-tab [data-pilha], #ar-tab [data-mundo], #ar-tab [data-heroi], #ar-tab #ar-roda, #ar-gaveta [data-hist], #ar-ajuda [data-id], #ar-decks [data-id], #ar-decks [data-heroi], #ar-decks [data-saga-id]');
       if (el) mostrarZoom(el); else esconderZoom();
     });
     /* o que a pessoa cola no Convite direto não some quando a tela redesenha */

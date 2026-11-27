@@ -230,6 +230,8 @@ const AR_IA = (() => {
         if (x && AR.jogar(p, c, x)) return true;
       }
     }
+    /* 3c. Transilvânia: de Dia, com Vampiros em campo, traz a Noite (Crepúsculo) antes de atacar. */
+    if (AR.estado().ciclo && !AR.noite() && AR.podePoder(p) && !AR.poderAtual(p).alvo && AR_DECKS[p.deckId].ciclo && p.campo.some(u => AR.vampiro(u)) && AR.usarPoder(p, null)) return true;
     const vouAtacar = AR.podeAtacar(p) && (AR.ataqueNormal(p) || AR.custoInvestida(p) <= 3);
     const sel = vouAtacar ? escolherAtaque(p) : null;
     /* 4a. Poder que causa dano: usa quando derruba alguém ou fere o Clímax rival. */

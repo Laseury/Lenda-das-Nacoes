@@ -8,7 +8,7 @@
 const BENCAOS_PANGEIA = {
   tempestade: 'seus Elusivos continuam Elusivos e suas Táticas custam 1 a menos.',
   eclipse: 'você compra até ter 5 (no mínimo 1) e não descarta nada.',
-  feira: 'o Mercado fica de graça e você pode comprar 2 por rodada.',
+  feira: 'o Mercado fica de graça (continua 1 compra por rodada).',
   inverno: 'suas unidades não perdem Ataque nem caem, e têm +1 de Vida.',
   lua: 'a sua Fúria dá +2/+2 em vez de +1/+1.',
   ouro: 'você recebe +2 de Influência em vez de +1.',

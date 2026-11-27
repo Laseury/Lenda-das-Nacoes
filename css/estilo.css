@@ -40,6 +40,8 @@
   --eg-1: #1f4f8f; --eg-2: #e6b84a; --eg-3: #b88a2e;
   --cn-1: #c8102e; --cn-2: #ffd34d; --cn-3: #8a0c20;
   --mx-1: #006847; --mx-2: #f4efe4; --mx-3: #ce1126; --mx-4: #8a5a2b;
+  --tr-1: #002b7f; --tr-2: #fcd116; --tr-3: #ce1126;
+  --pe-1: #d91023; --pe-2: #fbf7ee; --pe-3: #f2b632;
   --oe-1: #c9925a; --oe-2: #f2d06b; --oe-3: #7a3f1d;
   --ie-1: #169b62; --ie-2: #f4f1e8; --ie-3: #ff883e;
   --it-1: #009246; --it-2: #f4f1e8; --it-3: #ce2b37;
@@ -572,6 +574,8 @@ div.habilidade-op { cursor: default; }
 .n-GL { --n1: var(--gl-1); --n2: var(--gl-2); --n3: var(--gl-3); }
 .n-CN { --n1: var(--cn-1); --n2: var(--cn-2); --n3: var(--cn-3); }
 .n-MX { --n1: var(--mx-1); --n2: var(--mx-3); --n3: var(--mx-4); }
+.n-TR { --n1: #4a0d1a; --n2: #c22a44; --n3: #1d1a2e; }
+.n-PE { --n1: #8a5a12; --n2: var(--pe-3); --n3: #3f6b3a; }
 .n-OE { --n1: var(--oe-3); --n2: var(--oe-2); --n3: var(--oe-1); }
 .n-IE { --n1: var(--ie-1); --n2: var(--ie-3); --n3: #0e6b43; }
 .n-IT { --n1: var(--it-1); --n2: var(--it-3); --n3: #8a1d25; }

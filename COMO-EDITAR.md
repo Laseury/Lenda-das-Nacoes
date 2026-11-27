@@ -11,7 +11,7 @@ Não precisa instalar nada para editar. Para conferir os decks com o `Conferir d
 
 | Quero mexer em… | Arquivo |
 |---|---|
-| As cartas e a lista de 40 de um deck | `js/arena/dados/<nação>.js` (`brasil.js`, `japao.js`, `espanha.js`, `grecia.js`, `nordicos.js`, `portugal.js`, `pangeia.js`, `irlanda.js`, `china.js`, `russia.js`) |
+| As cartas e a lista de 40 de um deck | `js/arena/dados/<nação>.js` (`brasil.js`, `japao.js`, `espanha.js`, `grecia.js`, `nordicos.js`, `portugal.js`, `pangeia.js`, `irlanda.js`, `china.js`, `russia.js`, `oeste.js`, `incas.js`, `dracula.js`) |
 | Líder, Saga e Heróis de um deck | o mesmo arquivo da nação |
 | Números das regras (Capital 20, mão, Influência, Mercado, XP dos Heróis…) | `js/arena/dados/ajustes.js` |
 | Palavras-chave (Elusivo, Robusto…) e as funções que criam cartas | `js/arena/dados/base.js` |
@@ -114,7 +114,7 @@ Cada Herói são 3 cartas (nível 1, 2 e 3) + 1 Assinatura, e uma linha:
 arHeroi({ niveis: ['a_br_zumbi', 'a_br_zumbi2', 'a_br_zumbi3'], assinatura: 'a_br_quilombo', missao: 'bando', facil: true });
 ```
 
-- `missao`: o que dá XP extra: `'derrubar'`, `'sobreviver'`, `'duelo'`, `'capital'`, `'bando'`, `'descobrir'`, `'eras'`, `'congelar'` (pôr Gelo), `'ataque'`, `'ano'`, `'recompensa'` (a lista com o texto de cada uma está em `arMissao`, no `base.js`).
+- `missao`: o que dá XP extra: `'derrubar'`, `'sobreviver'`, `'duelo'`, `'capital'`, `'bando'`, `'descobrir'`, `'eras'`, `'congelar'` (pôr Gelo), `'ataque'`, `'ano'`, `'recompensa'`, `'sol'` (acelerar o Sol) (a lista com o texto de cada uma está em `arMissao`, no `base.js`).
 - `facil: true` para missões que acontecem quase toda rodada (pedem mais XP).
 - Só o nível 1 vai na lista do deck. Ponha o id dele também em `herois: [...]` do deck (no máximo 2).
 - O XP de cada nível fica em `ajustes.js`. Os Heróis chegam à mão pela compra normal; para voltar a trazê-los de graça em certas rodadas, ponha as rodadas em `chamado: [2, 5]`.
@@ -129,7 +129,7 @@ Tudo em `js/arena/dados/ajustes.js`, um número por linha, com a explicação ao
 2. No `index.html`, acrescente a linha `<script src="js/arena/dados/mexico.js"></script>` junto das outras nações (antes de `conferir.js`).
 3. Ponha as artes em `arte/` e rode `Atualizar artes.bat`. O cenário do tabuleiro é `arte/ce_mx.jpg`.
 4. O país aparece no mapa num quadradinho no rodapé. Para desenhá-lo no lugar certo, acrescente o contorno em `PAISES` no `js/arena/mapa.js` (e a bandeira em `BAND`, no `mesa.js`).
-5. Mecânicas totalmente novas (como o Gelo da Rússia) precisam de código no `motor.js`, e a CPU joga melhor com dicas no `ia.js`. Para essas, peça ajuda ao Claude.
+5. Mecânicas totalmente novas (como o Gelo da Rússia, o Sol dos Incas ou o Dia e Noite da Transilvânia) precisam de código no `motor.js`, e a CPU joga melhor com dicas no `ia.js`. Para essas, peça ajuda ao Claude.
 
 ---
 
